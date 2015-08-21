@@ -83,8 +83,8 @@ threads = 2;
 class=t_dbscan(Data4dbscan(:,1), Data4dbscan(:, 2), DBSCAN_Nb_Neighbor, DBSCAN_Radius, threads);
 Data4dbscan(:,3)=class;
 
-SumofContourBig=[];
-SumofContourSmall=[];
+SumofBigContour=[];
+SumofSmallContour=[];
 ClusterSmooth=cell(max(class),1);
 
 for i=1:max(class)
@@ -112,11 +112,11 @@ for i=1:max(class)
     ClusterSmooth{i,1}.TotalAreaDensity=AvDensity;    
     
     if Nb>=Cutoff
-        SumofContourBig=[SumofContourBig; contour; nan nan ];
+        SumofBigContour=[SumofBigContour; contour; nan nan ];
     else
-        SumofContourSmall=[SumofContourSmall; contour; nan nan ];  
+        SumofSmallContour=[SumofSmallContour; contour; nan nan ];  
     end
-    SumofContour={SumofContourBig, SumofContourSmall};
+    SumofContour={SumofBigContour, SumofSmallContour};
     
     % Plot the contour
     
@@ -147,13 +147,18 @@ end
 %%
 
 if display2==1
+    
                 Density=datathr(:,6);
                 fig2=figure;
                 hold on
                 %ax2=axes('parent',fig2);
                 scatter(x(:,1),x(:,2),2,Density);
-                plot(SumofContourBig(:,1),SumofContourBig(:,2),'r');
-                plot(SumofContourSmall(:,1),SumofContourSmall(:,2),'k');
+                if ~isempty(SumofBigContour)
+                    plot(SumofBigContour(:,1),SumofBigContour(:,2),'r');
+                end
+                if ~isempty(SumofSmallContour)
+                    plot(SumofSmallContour(:,1),SumofSmallContour(:,2),'k');
+                end
                 colorbar
                 axis equal
                 axis tight
@@ -171,8 +176,14 @@ if display2==1
                 hold on
                 %ax3=axes('parent',fig3);
                 scatter(x(:,1),x(:,2),2,Norm_Density);
-                plot(SumofContourBig(:,1),SumofContourBig(:,2),'r');
-                plot(SumofContourSmall(:,1),SumofContourSmall(:,2),'k');
+                
+                if ~isempty(SumofBigContour)
+                    plot(SumofBigContour(:,1),SumofBigContour(:,2),'r');
+                end
+                if ~isempty(SumofSmallContour)
+                    plot(SumofSmallContour(:,1),SumofSmallContour(:,2),'k');
+                end
+                
                 colorbar
                 axis equal
                 axis tight
