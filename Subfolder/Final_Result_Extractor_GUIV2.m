@@ -5,7 +5,7 @@ function Final_Result_Extractor_GUIV2(ROIPos,Result,ClusterSmoothTable)
 
 %% Extracting average values for each region into one column
 
-    data=ROIPos(1:5);
+    data=ROIPos(:,1:5);
 % load('DBSCAN_Cluster_Result.mat')
 
 A=Result(:);

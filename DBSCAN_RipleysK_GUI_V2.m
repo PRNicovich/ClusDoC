@@ -843,6 +843,7 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         set(popupCell2,'String',{'Cell'},'Value',1);
         handles.hROI=[];
         handles.CurrentCellata=[];
+        handles.CurrentData=[];
         handles.CurrentROIData=[];
 
 % initialize data to put into the axes on startup
@@ -853,6 +854,7 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
 
         
 %        h=msgbox('I say "Don''t touch"')
+        guidata(fig1,handles)
        end 
 
     function test(~,~,~)    
