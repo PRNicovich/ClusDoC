@@ -94,7 +94,7 @@ for i=1:max(class)
     plot( ax1,xin(:,1), xin(:,2),'Marker','.','MarkerSize',4,'LineStyle','none','color','green');
     end   
     
-    [ClusImage,  Area, Circularity, Nb, contour, edges, Cutoff_point]=Smoothing_fun4cluster_V2C_1_3(xin(:,1:2),0,0); % 0.1*max intensity 
+    [ClusImage,  Area, Circularity, Nb, contour, edges, Cutoff_point]=Smoothing_fun4cluster_GUIV2(xin(:,1:2),0,0); % 0.1*max intensity 
     
     
     ClusterSmooth{i,1}.Points=xin(:,1:2);
