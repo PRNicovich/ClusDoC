@@ -1,7 +1,7 @@
 function [Data_DofC,DensityROI]=Main_Fun_DofC_GUIV2(ROIData)
 %% Colocalization Malkusch (Histochem Cell Biol)
        
-        Path_name=pwd
+        Path_name=pwd;
         if ~exist(strcat(Path_name,'Image from DofC'),'dir')
             mkdir('Image from DofC');
         end
@@ -18,7 +18,7 @@ for nt=1:table_nb
         Data(isnan(Data(:,12)),:)=[];
         
         Data_DegColoc1=[]; % Data_DegColoc1 =[X Y Lr Kr Ch Density DofC D1_D2]
-        [ Data_DegColoc1, SizeROI1 ] = Degree_of_Colocalisation_FunV3( Data, r );
+        [ Data_DegColoc1, SizeROI1 ] = Fun_DofC_GUIV2( Data, r );
         
         CA1=Data_DegColoc1.DofC(Data_DegColoc1.Ch==1);
         CA2=Data_DegColoc1.DofC(Data_DegColoc1.Ch==2);

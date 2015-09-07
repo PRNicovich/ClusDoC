@@ -82,7 +82,7 @@ for i=1:max(class)
     
     [ClusImage,  Area, Circularity, Nb, contour, edges, Cutoff_point]=Smoothing_fun_Vgui(xin(:,1:2),0,0); % 0.1*max intensity 
     
-    
+   
     ClusterSmooth{i,1}.Points=xin(:,1:2);
     ClusterSmooth{i,1}.Image=ClusImage;
     ClusterSmooth{i,1}.Area=Area;
@@ -93,7 +93,7 @@ for i=1:max(class)
     ClusterSmooth{i,1}.Circularity=Circularity;
     ClusterSmooth{i}.Density_Nb_A=Nb/Area;
     ClusterSmooth{i,1}.TotalAreaDensity=AvDensity;  
-if 1==0    
+if 1==0     
     ClusterSmooth{i,1}.Density=Density(Data4dbscan(:,3)==i);
     ClusterSmooth{i,1}.RelativeDensity=Density(Data4dbscan(:,3)==i)/AvDensity;
     ClusterSmooth{i,1}.Mean_Density=mean(Density(Data4dbscan(:,3)==i));

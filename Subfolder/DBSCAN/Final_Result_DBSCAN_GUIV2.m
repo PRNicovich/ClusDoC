@@ -1,6 +1,6 @@
 
 
-function Final_Result_Extractor_GUIV2(ROIPos,Result,ClusterSmoothTable)
+function Final_Result_DBSCAN_GUIV2(ROIPos,Result,ClusterSmoothTable)
 
 
 %% Extracting average values for each region into one column

@@ -430,9 +430,7 @@ ResultTable=A;
 
         
         save('ResultTable','ResultTable');
-        clearvars -except ResultTable
-        toc
-%clear all        
+        toc      
 cd ..
 end    
     
