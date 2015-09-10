@@ -122,8 +122,7 @@ hRipleyK_All =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutt
 hDBSCAN_All =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'DBSCAN for All',...
         'Position', [xbutton ybutton w1 h1],...
         'Callback', @DBSCAN_All, 'Tag', 'DBSCAN_All','enable','off');     
-    
-    
+       
 % Button Degree of colocalisation
     h1=butt_height/2;w1=butt_width;
     xbutton=space1;ybutton=ybutton-(space1+h1);
@@ -131,12 +130,13 @@ hDofC_All1 =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton
         'Position', [xbutton ybutton w1 h1],...
         'Callback', @DofC_All, 'Tag', 'DofC_All','enable','off'); 
     
-% Button Test2
-    h1=butt_height/2;w1=butt_width;
-    xbutton=space1;ybutton=ybutton-(space1+h1);
-htest2 =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'Test2',...
-        'Position', [xbutton ybutton w1 h1],...
-        'Callback', @test2, 'Tag', 'test','enable','on');         
+% % Button Test2
+%     h1=butt_height/2;w1=butt_width;
+%     xbutton=space1;ybutton=ybutton-(space1+h1);
+% htest2 =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'Test2',...
+%         'Position', [xbutton ybutton w1 h1],...
+%         'Callback', @test2, 'Tag', 'test','enable','on');    
+    
 % Button Reset
     h1=butt_height/2;w1=butt_width;
     xbutton=space1;ybutton=ybutton-(space1+h1);
@@ -144,6 +144,7 @@ hreset =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', '
         'Position', [xbutton ybutton w1 h1],...
         'Callback', @Reset, 'Tag', 'Reset','enable','on'); 
     
+
     
 % % Button DBSCAN test for Active ROI
 %     h1=butt_height;w1=butt_width;
@@ -153,37 +154,21 @@ hreset =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', '
 %         'Callback', @DBSCAN, 'Tag', 'RipleyK_test','enable','off');    
  
 
-% Button Test
-    h1=butt_height/2;w1=butt_width;
-    xbutton=space1;ybutton=ybutton-(space1+h1);
-htest =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'Don''t Touch',...
-        'Position', [xbutton ybutton w1 h1],...
-        'Callback', @test, 'Tag', 'test','enable','on'); 
+% % Button Test
+%     h1=butt_height/2;w1=butt_width;
+%     xbutton=space1;ybutton=ybutton-(space1+h1);
+% htest =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'Don''t Touch',...
+%         'Position', [xbutton ybutton w1 h1],...
+%         'Callback', @test, 'Tag', 'test','enable','on'); 
+%     
+% % Button Handles check    
+%     h1=butt_height/2;w1=butt_width;
+%     xbutton=space1;ybutton=ybutton-(space1+h1);
+% hHandleCheck_Butt =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String',...
+%     'Handle Check','Position', [xbutton ybutton w1 h1],...
+%         'Callback', @Handles_Check, 'Tag', 'Handle Check');  
     
-% Button Handles check    
-    h1=butt_height/2;w1=butt_width;
-    xbutton=space1;ybutton=ybutton-(space1+h1);
-hHandleCheck_Butt =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String',...
-    'Handle Check','Position', [xbutton ybutton w1 h1],...
-        'Callback', @Handles_Check, 'Tag', 'Handle Check');  
-    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
-if 1==0
-% Button TEST
-    h1=butt_height;w1=butt_width;
-    xbutton=space1;ybutton=ybutton-(space1+h1);
-Load_out =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'test',...
-        'Position', [xbutton ybutton w1 h1],...
-        'Callback', @test, 'Tag', 'test');
 
-   
-% Last Button Handles Check
-    h1=butt_height;w1=butt_width;
-    xbutton=space1;ybutton=0.005;
-butt_Handles_Check =     uicontrol(b_panel2, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'Handles_Check',...
-        'Position', [xbutton ybutton w1 h1],...
-        'Callback', @Handles_Check, 'Tag', 'Handles_Check');
-end
 % End of buttons
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
