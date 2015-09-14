@@ -1,7 +1,8 @@
 function [Trig, NonTrig] = getDensity( ClusterSmoothTableCh1,case1 )
-%UNTITLED3 Summary of this function goes here
+% Function extract the density from the cell/structure data  ClusterSmoothTableCh1
+% density for Triggered and NonTriggered molecules
+% and calculate the histograms
 %   Detailed explanation goes here
-
 
     [row, column]=size(ClusterSmoothTableCh1);
     for i=1:column    
@@ -56,9 +57,6 @@ function [Trig, NonTrig] = getDensity( ClusterSmoothTableCh1,case1 )
     set(patch2(1),'FaceColor','r');
     tt = getframe(gcf);
     imwrite(tt.cdata, 'Hist_Trig_NonTrig_Ch1.tif');
-    
-
-
 
 end
 
