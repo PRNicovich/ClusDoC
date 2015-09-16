@@ -1,6 +1,6 @@
 function Result=DC_per_Cluster(ClusterSmoothTableCh1)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%% Extract and calculate the DC for each cluster 
+% and plot the mean and the standard deviation
 
 [ROI,Cell]=size(ClusterSmoothTableCh1);
 DofC_Cluster=[];
