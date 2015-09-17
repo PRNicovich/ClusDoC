@@ -1,4 +1,4 @@
-function [Trig, NonTrig] = getDensity( ClusterSmoothTableCh1,case1 )
+function [Trig, NonTrig, Result] = getDensity( ClusterSmoothTableCh1,case1 )
 % Function extract the density from the cell/structure data  ClusterSmoothTableCh1
 % density for Triggered and NonTriggered molecules
 % and calculate the histograms
@@ -21,9 +21,9 @@ function [Trig, NonTrig] = getDensity( ClusterSmoothTableCh1,case1 )
 
                 % Density for cluster Nb(Dof>0.4) >10    
 
-                if case1==1
+                if case1==1 % Case 1 : desnity Nb/A, 
                 Density_Trig{j,i}=cellfun(@(x) (x.RelativeDensity_Nb_A)*ones(x.Nb,1), Cluster_Trig,'UniformOutput',0);
-                elseif case1==2
+                elseif case1==2% Case 2 : desnity Nb/A, 
                 Density_Trig{j,i}=cellfun(@(x) x.RelativeDensity20, Cluster_Trig,'UniformOutput',0);
                 end
                 
@@ -33,7 +33,7 @@ function [Trig, NonTrig] = getDensity( ClusterSmoothTableCh1,case1 )
                 Cluster_NonTrig=cellfun(@(x) x(x.Nb_In<=10), A,'UniformOUtput',0);
                 Cluster_NonTrig=Cluster_NonTrig(~cellfun('isempty', Cluster_NonTrig));
 
-                if case1==1
+                if case1==1 
                 Density_NonTrig{j,i}=cellfun(@(x) (x.RelativeDensity_Nb_A)*ones(x.Nb,1), Cluster_NonTrig,'UniformOutput',0);   
                 elseif case1==2
                 Density_NonTrig{j,i}=cellfun(@(x) x.RelativeDensity20, Cluster_NonTrig,'UniformOutput',0);   
@@ -48,15 +48,24 @@ function [Trig, NonTrig] = getDensity( ClusterSmoothTableCh1,case1 )
     figure
     hist(Trig,100) % Hist does not return a handle, but creates an axes with a child of type Patch
     patch1 = findobj(gca,'type','Patch'); % The child object of axes is a Patch Object
-
+    set(patch1(1),'FaceColor','r');
 
     hold on     
     hist(NonTrig,100)
     patch2 = findobj(gca,'type','Patch'); % The child object of axes is a Patch Object
     set(patch2,'FaceAlpha',0.2);
-    set(patch2(1),'FaceColor','r');
+    set(patch2(1),'FaceColor','b');
     tt = getframe(gcf);
     imwrite(tt.cdata, 'Hist_Trig_NonTrig_Ch1.tif');
-
+    
+    Density_Thres=prctile(NonTrig,95);
+    NbTrig_above_Thres=length(find(Trig>Density_Thres));
+    Per_Trig_Above_Density_Thres1=NbTrig_above_Thres/length(Trig);
+    Per_Trig_Above_Density_Thres2= 100-invprctile(Trig, Density_Thres);
+    
+    
+    
+    
+    Result=table(Density_Thres, Per_Trig_Above_Density_Thres1, NbTrig_above_Thres, Per_Trig_Above_Density_Thres2);
 end
 
