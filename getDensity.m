@@ -45,6 +45,11 @@ function [Trig, NonTrig, Result] = getDensity( ClusterSmoothTableCh1,case1 )
     Trig=cell2mat(cellfun(@(x) cell2mat(x), Density_Trig(:),'UniformOutput',0));
     NonTrig=cell2mat(cellfun(@(x) cell2mat(x), Density_NonTrig(:),'UniformOutput',0));
     
+    Density_Thres=prctile(NonTrig,95);
+    NbTrig_above_Thres=length(find(Trig>Density_Thres));
+    Per_Trig_Above_Density_Thres1=NbTrig_above_Thres/length(Trig);
+    Result=table(Density_Thres, Per_Trig_Above_Density_Thres1, NbTrig_above_Thres);
+    
     figure
     hist(Trig,100) % Hist does not return a handle, but creates an axes with a child of type Patch
     patch1 = findobj(gca,'type','Patch'); % The child object of axes is a Patch Object
@@ -55,17 +60,19 @@ function [Trig, NonTrig, Result] = getDensity( ClusterSmoothTableCh1,case1 )
     patch2 = findobj(gca,'type','Patch'); % The child object of axes is a Patch Object
     set(patch2,'FaceAlpha',0.2);
     set(patch2(1),'FaceColor','b');
+    X=Density_Thres*ones(2,1);
+    Y=ylim;
+    hold on;line(X,Y,'Color','red','LineWidth',1)
+    
     tt = getframe(gcf);
     imwrite(tt.cdata, 'Hist_Trig_NonTrig_Ch1.tif');
     
-    Density_Thres=prctile(NonTrig,95);
-    NbTrig_above_Thres=length(find(Trig>Density_Thres));
-    Per_Trig_Above_Density_Thres1=NbTrig_above_Thres/length(Trig);
-    Per_Trig_Above_Density_Thres2= 100-invprctile(Trig, Density_Thres);
+
     
     
     
     
-    Result=table(Density_Thres, Per_Trig_Above_Density_Thres1, NbTrig_above_Thres, Per_Trig_Above_Density_Thres2);
+    
+    
 end
 
