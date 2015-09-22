@@ -47,8 +47,10 @@ function [Trig, NonTrig, Result] = getDensity( ClusterSmoothTableCh1,case1 )
     
     Density_Thres=prctile(NonTrig,95);
     NbTrig_above_Thres=length(find(Trig>Density_Thres));
+    Nb_NonTrig_above_Thres=length(find(NonTrig>Density_Thres));
     Per_Trig_Above_Density_Thres1=NbTrig_above_Thres/length(Trig);
-    Result=table(Density_Thres, Per_Trig_Above_Density_Thres1, NbTrig_above_Thres);
+    Per_NonTrig_Above_Density_Thres1=Nb_NonTrig_above_Thres/length(NonTrig);
+    Result=table(Density_Thres, Per_Trig_Above_Density_Thres1, NbTrig_above_Thres, Per_NonTrig_Above_Density_Thres1);
     
     figure
     hist(Trig,100) % Hist does not return a handle, but creates an axes with a child of type Patch

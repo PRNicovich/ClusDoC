@@ -26,7 +26,7 @@ TrigCluster={};
             A=ClusterSmoothTableCh1{roi,cell};
 
             if ~isempty(A)
-                                
+                                 
                 A2=cellfun(@(x) x(x.Nb_In>10),A,'UniformOutput',0);
                 A2=A2(~cellfun('isempty',A2));
                 
