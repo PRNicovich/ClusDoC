@@ -94,8 +94,33 @@ Per_All=table(Per_NonClus,Per_NonTrig,Per_Trig...
         end    
     end
     
-
+%%
 DenseCluster_per_DofC04=cellfun(@(x) length(find(x>0.4))/length(x),DofC_DenseCluster);
 NotDenseCluster_per_DofC04=cellfun(@(x) length(find(x>0.4))/length(x),DofC_NotDenseCluster);
 NotDense_Dense_per_DC04=table(DenseCluster_per_DofC04,NotDenseCluster_per_DofC04);
 save('NotDense_Dense_per_DC04','NotDense_Dense_per_DC04');
+
+%%
+DenseDC04=cellfun(@(x) length(find(x>0.4)),DofC_DenseCluster);
+Dense=cellfun(@(x) length(x),DofC_DenseCluster);
+NotDenseDC04=cellfun(@(x) length(find(x>0.4)),DofC_NotDenseCluster);
+NotDense=cellfun(@(x) length(x),DofC_NotDenseCluster);
+
+NbAll=Dense+NotDense;
+NbAllDC04=DenseDC04+NotDenseDC04;
+
+perDense=Dense./NbAll;
+perNotDense=NotDense./NbAll;
+
+PerDenseDC04=DenseDC04./AllDC04;
+PerNotDenseDC04=NotDenseDC04./AllDC04;
+
+Per_NotDense_Dense=table(perDense,perNotDense,PerDenseDC04,PerNotDenseDC04);
+save('Per_NotDense_Dense','Per_NotDense_Dense')
+
+
+
+
+
+
+
