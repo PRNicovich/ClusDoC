@@ -69,7 +69,7 @@ Density_Threshold=6;
               B=ROIData{roi,cell};
               BCh2=B(B(:,12)==2,:);
               CNotDense=NotDense_Contour{roi,cell};
-              if ~isempty(B)
+              
                   in={};
                   for i=1:length(CNotDense)
 
