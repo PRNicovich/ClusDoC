@@ -20,13 +20,13 @@
                 DofC_DenseCluster{roi,cell}=cell2mat(cellfun(@(x) x.Data_DoCi.DofC,Dense_t,'UniformOutput',0));
 
                 DenseCluster{roi,cell}=Dense_t;
-                % NotDense Cluster
                 
+                % NotDense Cluster
                 NotDense_t= cellfun(@(y) y(y.AvRelativeDensity20<6),A,'UniformOutput',0);
                 NotDense_t=NotDense_t(~cellfun('isempty',NotDense_t));
                 
                 DofC_NotDenseCluster{roi,cell}=cell2mat(cellfun(@(x) x.Data_DoCi.DofC,NotDense_t,'UniformOutput',0));
-
+                
                 NotDenseCluster{roi,cell}=Dense_t;
                 
             end        
@@ -58,6 +58,8 @@ Per_NotDense_Dense=table(perDense,perNotDense,PerDenseDC04,PerNotDenseDC04);
 save('Per_NotDense_Dense','Per_NotDense_Dense')
 
 
+
+%%
 
 
 

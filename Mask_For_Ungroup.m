@@ -19,7 +19,7 @@ clearvars -except ClusterSmoothTableCh1 ROIData
 %% Triggered Cluster 
 
 [ROI, CELL]=size(ClusterSmoothTableCh1);
-TrigCluster={};
+TrigCluster=cell{roi,cell};
 
     for cell=1:CELL    
         for roi=1:ROI
@@ -39,7 +39,8 @@ TrigCluster={};
 %% Triggered Contour 
 
     [ROI, CELL]=size(TrigCluster);
-    ContourTrig={};
+    ContourTrig=cell{roi,cell};
+    ContourTrig2=cell{roi,cell};
     for cell=1:CELL    
         for roi=1:ROI
             A=TrigCluster{roi,cell};
