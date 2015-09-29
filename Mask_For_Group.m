@@ -1,4 +1,4 @@
-function [NbTable_Trig,Area_Trig,DensityNbA_Trig,NbTable_NonTrig,Area_NonTrig,DensityNbA_NonTrig]=Mask_For_Ungroup
+function [NbTable_Trig,Area_Trig,DensityNbA_Trig,NbTable_NonTrig,Area_NonTrig,DensityNbA_NonTrig]=Mask_For_Group
 %% Instruction from load Region_and_Data.mat
 clearvars -except ClusterSmoothTableCh1 ROIData
 
@@ -65,7 +65,6 @@ clearvars -except ClusterSmoothTableCh1 ROIData
 % Plot histogram and adjust the 
 %histmask=histmask(histmask<100);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% NonTriggered Cluster 
