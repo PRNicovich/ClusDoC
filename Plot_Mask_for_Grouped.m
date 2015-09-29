@@ -8,8 +8,8 @@ histmask_Trig=cell2mat(histmask_Trig);
 Mean_Nb_Trig=mean(histmask_Trig)
 % Plot histogram and adjust the size 
 figure
-histmask_Trig=histmask_Trig(histmask_Trig<200);
-hist(histmask_Trig,100)
+histmask_Trig=histmask_Trig(histmask_Trig<200); % change the limit for the plot
+hist(histmask_Trig,100) % change the binning , number of bar displayed
 title('Triggered : Number of particle per cluster')
 
 %% Area per cluster

@@ -1,5 +1,10 @@
 function [NbTable_Trig,Area_Trig,DensityNbA_Trig,NbTable_NonTrig,Area_NonTrig,DensityNbA_NonTrig]=Mask_For_Group
-%% Instruction from load Region_and_Data.mat
+%% Just run the function using the following line
+% [NbTable_Trig,Area_Trig,DensityNbA_Trig,NbTable_NonTrig,Area_NonTrig,DensityNbA_NonTrig]=Mask_For_Group;
+% First you are ask to choose the file ClusterSmoothTableCh1 (or Ch2) of the ungrouped data
+% Then Choose the Region_and_Data in the grouped data folder
+% Then use the script Plot_Mask_for_Grouped to plot the graph. Do this you
+% will be able to chnage the threshold and the limit for the graph
 clearvars -except ClusterSmoothTableCh1 ROIData
 
         [File_name,Path_name] = uigetfile({'*.mat'},'Choose ClusterSmoothTableCh1 for Ungrouped Data');
