@@ -5,7 +5,7 @@ function [NbTable_Trig,Area_Trig,DensityNbA_Trig,NbTable_NonTrig,Area_NonTrig,De
 % Then Choose the Region_and_Data in the grouped data folder
 % Then use the script Plot_Mask_for_Grouped to plot the graph. Do this you
 % will be able to chnage the threshold and the limit for the graph
-clearvars -except ClusterSmoothTableCh1 ROIData
+
 
         [File_name,Path_name] = uigetfile({'*.mat'},'Choose ClusterSmoothTableCh1 for Ungrouped Data');
         cd(Path_name)
@@ -37,6 +37,7 @@ clearvars -except ClusterSmoothTableCh1 ROIData
                 
                 ContourTrig{roi,cell}=cellfun(@(x) x.Contour ,A2,'UniformOutput',0);
                 Area_Trig{roi,cell}=cellfun(@(x) x.Area ,A2,'UniformOutput',1);
+                Density_Trig{roi,cell}=cellfun(@(x) mean(x.Data_DoCi.Density) ,A2,'UniformOutput',1);
                 
             end        
         end    
@@ -88,7 +89,7 @@ clearvars -except ClusterSmoothTableCh1 ROIData
                 
                 ContourNonTrig{roi,cell}=cellfun(@(x) x.Contour ,A2,'UniformOutput',0);
                 Area_NonTrig{roi,cell}=cellfun(@(x) x.Area ,A2,'UniformOutput',1);
-                
+                Density_NonTrig{roi,cell}=cellfun(@(x) mean(x.Data_DoCi.Density) ,A2,'UniformOutput',1);
             end        
         end    
     end

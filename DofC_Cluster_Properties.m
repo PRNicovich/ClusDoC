@@ -1,10 +1,15 @@
+function DofC_Cluster_Properties(ClusterSmoothTableCh1)
 %% Identify untriggered and triggered clusters
-% 
-% Ch1 and Ch2
-% load data from DBSCAN after DofC
-% load('F:\DATA_PALM\Sophie Data\Dataset for changes\ResultDofC_V3_with_Threshold\DBSCAN for DoC Ch1_V3\DBSCAN for DoC Ch1.mat')
 
-%Ch1
+%% How to use this function :
+
+
+% -1-  load data from DBSCAN after DofC
+%  it looks like this load('\DBSCAN for DoC Ch1_V3\DBSCAN for DoC Ch1.mat')
+%  you get 2 ClusterSmoothTableCh1 and ClusterSmoothTableCh2
+% 
+% -2- Copy DofC_Cluster_Properties(ClusterSmoothTableCh1) in the command window
+% for ch1 and DofC_Cluster_Properties(ClusterSmoothTableCh2) for ch2
 
 [row, column]=size(ClusterSmoothTableCh1);
 Cluster_Trig_Ch1=cell(row,column);
