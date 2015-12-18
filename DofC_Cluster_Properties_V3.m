@@ -8,8 +8,8 @@ function DofC_Cluster_Properties_V3(ClusterSmoothTableCh1,Cluster_Cutoff)
 %  it looks like this load('\DBSCAN for DoC Ch1_V3\DBSCAN for DoC Ch1.mat')
 %  you get 2 ClusterSmoothTableCh1 and ClusterSmoothTableCh2
 % 
-% -2- Copy DofC_Cluster_Properties(ClusterSmoothTableCh1) in the command window
-% for ch1 and DofC_Cluster_Properties(ClusterSmoothTableCh2) for ch2
+% -2- Copy DofC_Cluster_Properties_V3(ClusterSmoothTableCh1,10) in the command window
+% for ch1 and DofC_Cluster_Properties_V3(ClusterSmoothTableCh2,10) for ch2
 
 [row, column]=size(ClusterSmoothTableCh1);
 Cluster_DC_Above=cell(row,column);
