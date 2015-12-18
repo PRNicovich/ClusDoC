@@ -1,4 +1,4 @@
-function [datathr,ClusterSmooth,SumofContour] = Fun_DBSCAN_Test( Data,r,Cutoff)
+function [datathr,ClusterSmooth,SumofContour,figDBSCAN,figMap] = Fun_DBSCAN_Test( Data,r,Cutoff,DBSCAN_Radius,DBSCAN_Nb_Neighbor)
 %UNTITLED7 Summary of this function goes here
 %   Detailed explanation goes here
 %   Data = Zen format
@@ -30,7 +30,7 @@ Nrandom=AvDensity*pi*r^2;
 
 %% L(r) thresholding
 
-if 1==0
+if 1==1
     %% Calculate Lr for cumulated channels ch1 
         %  Threshold the Lr at Lr_Threshold
 
@@ -61,8 +61,8 @@ end
 
 %%
 Data4dbscan=x(:,1:2);
-DBSCAN_Radius=20;
-DBSCAN_Nb_Neighbor=3;%ceil(Nrandom);
+%DBSCAN_Radius=20;
+%DBSCAN_Nb_Neighbor=3;%ceil(Nrandom);
 threads = 2;
 
 % FAST DBSCAN CALL
@@ -142,15 +142,17 @@ if 1==0
                 axis tight
                 set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
                 set(gcf,'Color',[1 1 1])
-                tt = getframe(fig2);
-                imwrite(tt.cdata, strcat('Image Cluster Density Map\',Name, '_Density_map.tif'))
-                close gcf
+                %tt = getframe(fig2);
+                %imwrite(tt.cdata, strcat('Image Cluster Density Map\',Name, '_Density_map.tif'))
+                %close gcf
                 %print(gcf,'-dtiff',strcat('Image Cluster Density Map\',Name2, '_Norm_Density_map'));
                 %saveas(gcf,strcat('Image Cluster Density Map\',Name2, '_Density_map'), 'tif');
                 %close fig2 
-                
+end
+
+if 1==1
                 Norm_Density=Density./max(Density);
-                fig3=figure;
+                figMap=figure;
                 hold on
                 %ax3=axes('parent',fig3);
                 scatter(x(:,1),x(:,2),2,Norm_Density);
@@ -161,14 +163,11 @@ if 1==0
                 axis tight
                 set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
                 set(gcf,'Color',[1 1 1])
-                tt = getframe(fig3);
-                imwrite(tt.cdata, strcat('Image Cluster Density Map\',Name, '_Norm_Density_map.tif'))
-                close gcf
-                %print(gcf,'-dtiff',strcat('Image Cluster Density Map\',Name2, '_Norm_Density_map'));
-                %saveas(gcf,strcat('Image Cluster Density Map\',Name2, '_Norm_Density_map'), 'tif');
-                %close fig3
-end
+                %tt = getframe(fig3);
+                %imwrite(tt.cdata, strcat('Image Cluster Density Map\',Name, '_Norm_Density_map.tif'))
+                %close gcf
 
+end
 
 end
 

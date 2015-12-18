@@ -199,7 +199,8 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         handles.ROIPos=[];
         handles.CurrentCellData=[];
         handles.CurrentROIData=[];
-        
+        global dataHandles
+        dataHandles=handles;
         
         guidata(fig1, handles);
         
@@ -271,9 +272,11 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         
         Path_name = uigetdir([],'Select the folder containing your data and region from Zen');
         cd(Path_name)
-        if exist('Extracted_Region/Region_and_Data.mat')
-            load('Extracted_Region/Region_and_Data.mat')
+        
+        if exist([Path_name '\Extracted_Region/Region_and_Data.mat'])
+            load([Path_name '\Extracted_Region/Region_and_Data.mat'])
         else
+            
             [Cell_Ind,ROI,ROIPos,CellData, ROIData]=ROI_Extractor_GUI_V2(); 
         end
         unique(ROIPos(:,1));
@@ -286,7 +289,7 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         
         % Plot the first cell
         Data1=CellData{1,1};
-        Ch1Ch2=(length(unique(Data1(:,12)))==1);
+        Ch1Ch2=(length(unique(Data1(:,12)))==1)
         FunPlot(Data1,Ch1Ch2)
         
         CurrentCellROI=ROIPos(ROIPos(:,1)==CellVal,3:6);
@@ -324,8 +327,9 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         handles.ROIData=ROIData;
         handles.CurrentData=CurrentData;
         handles.Outputfolder=Outputfolder;
- 
         guidata(fig1,handles)
+        
+        dataHandles=handles;
     end
 
     function Load_DataSet(~, ~, ~)
@@ -546,6 +550,7 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
  
         CurrentCellData=CellData{CellValue};
         whos CurrentCellData
+        
          % Crop the selection
         CurrentROI=getPosition(hROI);
         Data1=CurrentCellData(:,5:6);
@@ -677,7 +682,7 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
          xlabel('r (nm)')
          ylabel('L(r)-r')
          
-         %Ch1
+         %Ch2
          % RipleyK function
          [r Lr_r]=RipleyFunV2( xCh2,A,Start,End,Step,size_ROI);
          
@@ -716,14 +721,38 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
          [ xCh2, Index_InCh2] = Cropping_Fun(DataCh2(:,5:6),CurrentROI);
          DataCh2=DataCh2(Index_InCh2,:);
          
-         %DBSCAN Parameter
+         % Parameter
+         % -- DBSCAN
+         prompt = {'Enter Raduis:','Enter Epsilon:'};
+         dlg_title = 'Input';
+         num_lines = 1;
+         defaultans = {'20','3'};
+         answer = inputdlg(prompt,dlg_title,num_lines,defaultans);
+         DBSCAN_Radius=str2num(answer{1});
+         DBSCAN_Nb_Neighbor=str2num(answer{2});
+         
+         % -- Thresholding
          r=50;
          Cutoff=10;
+         
          %DBSCAN function
-         [datathr,ClusterSmooth,SumofContour] = Fun_DBSCAN_Test( DataCh1,r,Cutoff);
-         set(gcf,'Name','DBSCAN Active ROI Ch1')
-         [datathr,ClusterSmooth,SumofContour] = Fun_DBSCAN_Test( DataCh2,r,Cutoff);
-         set(gcf,'Name','DBSCAN Active ROI Ch2')
+         if length(DataCh1)~=0;
+ 
+             %[datathr,ClusterSmooth,SumofContour,figDBSCAN,figMap] = Fun_DBSCAN_Test( DataCh1,r,Cutoff);
+             [datathr,ClusterSmooth,SumofContour,figDBSCAN,figMap] = Fun_DBSCAN_Test( DataCh1,r,Cutoff,...
+                 DBSCAN_Radius,DBSCAN_Nb_Neighbor)
+             
+             set(figDBSCAN,'Name','DBSCAN ROI Ch1')
+             set(figMap,'Name','DBSCAN Density map ROI Ch1')
+             
+         end
+         
+         if length(DataCh2)~=0;
+             %[datathr,ClusterSmooth,SumofContour] = Fun_DBSCAN_Test( DataCh2,r,Cutoff);
+             [datathr,ClusterSmooth,SumofContour,figDBSCAN,figMap] = Fun_DBSCAN_Test( DataCh2,r,Cutoff,...
+                 DBSCAN_Radius,DBSCAN_Nb_Neighbor)
+             set(gcf,'Name','DBSCAN Active ROI Ch2')
+         end
          guidata(fig1, handles);
     end
 
@@ -822,30 +851,35 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         Outputfolder=handles.Outputfolder;
         cd(Outputfolder)
         
-        mkdir('DofC_Result');        
-        cd('DofC_Result')
-        Path_name=pwd;
-        
-        
-        
-        [Data_DofC,DensityROI]=Main_Fun_DofC_GUIV2(ROIData);
-        % plot the map
-        ResultTable=Fun_Map_DofC_GUIV2(ROIData,Data_DofC, DensityROI);
-        
-        [ClusterTableCh1, ClusterTableCh2]=Fun_DBSCAN_DofC_GUIV2(ROIData,Data_DofC);
-        
-        Fun_Stat_DBSCAN_DofC_GUIV2(ClusterTableCh1,1)
-        Fun_Stat_DBSCAN_DofC_GUIV2(ClusterTableCh2,2)
-        
-        % Density_Area_Stat_4_DBSCAN_V3
-        
-        
-        set(hDofC_All1,'Backgroundcolor',[.94 .94 .94]);
-        set(hVector,'enable','on');
+        NbCh2=length(find(ROIData{1,1}(:,12)==2));
+        if NbCh2==0
+            
+            msgbox('It is one color data, DofC requires two color data')
+        else
 
-        handles.Data_DofC=Data_DofC;
-        handles.DensityROI=DensityROI;
-        guidata(fig1,handles)
+            mkdir('DofC_Result');        
+            cd('DofC_Result')
+            Path_name=pwd;
+            
+            [Data_DofC,DensityROI]=Main_Fun_DofC_GUIV2(ROIData);
+            % plot the map
+            ResultTable=Fun_Map_DofC_GUIV2(ROIData,Data_DofC, DensityROI);
+
+            [ClusterTableCh1, ClusterTableCh2]=Fun_DBSCAN_DofC_GUIV2(ROIData,Data_DofC);
+
+            Fun_Stat_DBSCAN_DofC_GUIV2(ClusterTableCh1,1)
+            Fun_Stat_DBSCAN_DofC_GUIV2(ClusterTableCh2,2)
+
+            % Density_Area_Stat_4_DBSCAN_V3
+
+
+
+            handles.Data_DofC=Data_DofC;
+            handles.DensityROI=DensityROI;
+            guidata(fig1,handles)
+        end
+            set(hDofC_All1,'Backgroundcolor',[.94 .94 .94]);
+            set(hVector,'enable','on');
     end
 
     function test2(~,~,~) 
