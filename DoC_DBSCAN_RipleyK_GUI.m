@@ -274,6 +274,9 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         else
             [Cell_Ind,ROI,ROIPos,CellData, ROIData]=ROI_Extractor_GUI_V2(); 
         end
+        
+        % ROIData is all data in a single ROI, regardless of channel.
+        
         unique(ROIPos(:,1));
         CellList=cellstr(num2str(unique(ROIPos(:,1))));
         set(popupCell2,'String', CellList);
@@ -317,7 +320,7 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         
         handles.Path_name=Path_name;
         handles.hROI=hROI;
-        handles.ROIPos=ROIPos;
+        handles.ROIPos=ROIPos; % Unmodified copy between importdata and here
         handles.CellData=CellData;
         handles.ROIData=ROIData;
         handles.CurrentData=CurrentData;
@@ -790,35 +793,38 @@ axis image % Freezes axis aspect ratio to that of the initial image - disallows 
         cd('DBSCAN_Result')
         Path_name=pwd;
         
+%         [AllDataCh1, AllDataCh2]=Extract_Ch1_Ch2(ROIData);
         [AllDataCh1, AllDataCh2]=Extract_Ch1_Ch2(ROIData);
         
         for Channel=1:2;
 
-            if Channel==1
-                AllData=AllDataCh1;
-                if ~exist(strcat(Path_name,'\Ch1'),'dir')
-                    mkdir('Ch1');
-                end
-                cd('Ch1')
-
-                [ClusterSmoothTable,Result]=DBSCAN_MultiData_GUIFunV2(AllDataCh1);
-                Final_Result_DBSCAN_GUIV2(ROIPos,Result,ClusterSmoothTable);
-
-            elseif Channel==2
-                
-                AllData=AllDataCh2;
-                A=cellfun(@isempty,AllData);
-
-                if any(A~=0)
-                    
-                    if ~exist(strcat(Path_name,'\Ch2'),'dir')
-                        mkdir('Ch2');
+            switch Channel
+                case 1
+%                     AllData=AllDataCh1;
+                    if ~exist(strcat(Path_name,'\Ch1'),'dir')
+                        mkdir('Ch1');
                     end
-                    cd('Ch2')
-
-                    [ClusterSmoothTable,Result]=DBSCAN_MultiData_GUIFunV2(AllDataCh2);
+                    cd('Ch1')
+                    
+                    [ClusterSmoothTable,Result]=DBSCAN_MultiData_GUIFunV2(AllDataCh1);
                     Final_Result_DBSCAN_GUIV2(ROIPos,Result,ClusterSmoothTable);
-                end
+                    
+                case 2
+                    
+%                     AllData=AllDataCh2;
+%                     A=cellfun(@isempty,AllDataCh2);
+                    
+%                     if any(A~=0)
+                        
+                        if ~isempty(AllDataCh2)
+                            if ~exist(strcat(Path_name,'\Ch2'),'dir')
+                                mkdir('Ch2');
+                            end
+                            cd('Ch2')
+
+                            [ClusterSmoothTable,Result]=DBSCAN_MultiData_GUIFunV2(AllDataCh2);
+                            Final_Result_DBSCAN_GUIV2(ROIPos,Result,ClusterSmoothTable);
+                        end
             end
             cd(Path_name)
         end
