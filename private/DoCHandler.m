@@ -37,7 +37,7 @@ function [Data_DoC, DensityROI] = DoCHandler(ROIPos, CellData, Lr_rad, Rmax, Ste
 
                 handles.handles.DoCFigPerROI = figure('color', [1 1 1], 'inverthardcopy', 'off');
 
-                handles.handles.DoCAxPerROI(1) = subplot(2,1,2);
+                handles.handles.DoCAxPerROI(1) = subplot(2,1,1);
                 histHand = histogram(handles.handles.DoCAxPerROI(1), CA1, 100);
                 histHand.FaceColor = Chan1Color;
                 histHand.EdgeColor = rgb(52, 73, 94);
@@ -46,7 +46,7 @@ function [Data_DoC, DensityROI] = DoCHandler(ROIPos, CellData, Lr_rad, Rmax, Ste
                 ylabel(handles.handles.DoCAxPerROI(1), 'Frequency','FontSize',20);
                 set(handles.handles.DoCAxPerROI(1),'FontSize',20)
 
-                handles.handles.DoCAxPerROI(2) = subplot(2,1,1);
+                handles.handles.DoCAxPerROI(2) = subplot(2,1,2);
                 histHand = histogram(handles.handles.DoCAxPerROI(2), CA2, 100);
                 histHand.FaceColor = Chan2Color;
                 histHand.EdgeColor = rgb(52, 73, 94);
@@ -86,7 +86,7 @@ function [Data_DoC, DensityROI] = DoCHandler(ROIPos, CellData, Lr_rad, Rmax, Ste
     % Plot summary data
     handles.handles.DoCFig = figure('color', [1 1 1], 'inverthardcopy', 'off');
 
-    handles.handles.DoCAx(1) = subplot(2,1,2);
+    handles.handles.DoCAx(1) = subplot(2,1,1);
     histHand = histogram(handles.handles.DoCAx(1), DoC1, 100);
     histHand.FaceColor = Chan1Color;
     histHand.EdgeColor = rgb(52, 73, 94);
@@ -95,7 +95,7 @@ function [Data_DoC, DensityROI] = DoCHandler(ROIPos, CellData, Lr_rad, Rmax, Ste
     ylabel(handles.handles.DoCAx(1), 'Frequency','FontSize',20);
     set(handles.handles.DoCAx(1),'FontSize',20)
 
-    handles.handles.DoCAx(2) = subplot(2,1,1);
+    handles.handles.DoCAx(2) = subplot(2,1,2);
     histHand = histogram(handles.handles.DoCAx(2), DoC2, 100);
 	histHand.FaceColor = Chan2Color;
     histHand.EdgeColor = rgb(52, 73, 94);
