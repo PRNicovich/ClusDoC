@@ -396,11 +396,12 @@ function Load_Data(~,~,~)
         handles.CellData = RegAndData.CellData;
         handles.ROIData = RegAndData.ROIData;
     else
-        [handles.Cell_Ind, handles.ROI, handles.ROIPos, handles.CellData, handles.ROIData]=ROI_Extractor_GUI_V2();
+        guidata(handles.handles.MainFig, handles);
+        [handles.Cell_Ind, handles.ROI, handles.ROIPos, handles.CellData, handles.ROIData, handles.Outputfolder]=ROI_Extractor_GUI_V2();
     end
 
     % ROIData is all data in a single ROI, regardless of channel.
-
+    
     unique(handles.ROIPos(:,1));
     handles.CellList = cellstr(num2str(unique(handles.ROIPos(:,1))));
     set(handles.handles.popupCell2,'String', handles.CellList);

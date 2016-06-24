@@ -1,6 +1,6 @@
 % Import data and regions files for DoC_DBSCAN_RipleyK_GUI
 
-function [Cell_Ind, ROI, ROIPos, CellData, ROIData] = ROI_Extractor_GUI_V2()
+function [Cell_Ind, ROI, ROIPos, CellData, ROIData, Outputfolder] = ROI_Extractor_GUI_V2()
 
     handles = guidata(findobj('Tag', 'PALM GUI'));
 
@@ -60,14 +60,14 @@ function [Cell_Ind, ROI, ROIPos, CellData, ROIData] = ROI_Extractor_GUI_V2()
         ROIPos = ROI(:,1:2);
         
     %% Create the "Extracted Region" folder   
-            if ~exist(strcat(coordPathName,'Extracted_Region'), 'dir')
-                mkdir('Extracted_Region');
+            if ~exist(fullfile(handles.Path_name, 'Extracted_Region'), 'dir')
+                mkdir(fullfile(handles.Path_name, 'Extracted_Region'));
             end
 
     %% 
     
     Grand_Table = cell(size(ROI, 1), 5);
-    AllData = zeros(max(Table_nb, [], 2), max(Table_nb, [], 1));
+    AllData = cell(max(Table_nb(:,2)), max(Table_nb(:,1)));
     
     for i = 1:size(ROI,1)
         %xroi = [ROI(i,1)-sizeROI ROI(i,1)+sizeROI ROI(i,1)+sizeROI ROI(i,1)-sizeROI ROI(i,1)-sizeROI];
@@ -93,7 +93,7 @@ function [Cell_Ind, ROI, ROIPos, CellData, ROIData] = ROI_Extractor_GUI_V2()
          Grand_Table{i,5} = TableOI(XYin,:);
 %          TableIndex = Table_nb(i);
 %          RegionIndex = Table_nb(i);
-         AllData(Table_nb(i,2),Table_nb(i,1)) = Grand_Table(i,5);
+         AllData{Table_nb(i,2),Table_nb(i,1)} = TableOI(XYin,:);
          CellData = TableData;
          ROIData = AllData;
 
@@ -102,11 +102,13 @@ function [Cell_Ind, ROI, ROIPos, CellData, ROIData] = ROI_Extractor_GUI_V2()
     
     handles.AllData = AllData;
     handles.CellData = TableData;
-    handles.GrandTable = GrandTable;
+%     handles.GrandTable = GrandTable;
 
-    save(fullfile(handles.Outputfolder, 'AllData.mat'), 'AllData');
-    save(fullfile(handles.Outputfolder, 'Grand_Table.mat'), 'Grand_Table');
-    save(fullfile(handles.Outputfolder, 'Region_and_Data.mat'), 'Cell_Ind','ROI','CellData', 'ROIData','ROIPos');
+    save(fullfile(handles.Path_name, 'Extracted_Region', 'AllData.mat'), 'AllData');
+%     save(fullfile(handles.Path_name, 'Extracted_Region', 'Grand_Table.mat'), 'Grand_Table');
+    save(fullfile(handles.Path_name, 'Extracted_Region', 'Region_and_Data.mat'), 'Cell_Ind','ROI','CellData', 'ROIData','ROIPos');
+    
+    Outputfolder = fullfile(handles.Path_name, 'Extracted_Region');
     
     guidata(handles.handles.MainFig, handles);
 

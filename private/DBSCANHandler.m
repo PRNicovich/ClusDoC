@@ -129,19 +129,20 @@ try
             ClusterSmooth{i,1}.TotalAreaDensity = AvDensity;%
             ClusterSmooth{i,1}.Density_Nb_A = Nb/Area;%
             ClusterSmooth{i, 1}.RelativeDensity_Nb_A=Nb/Area/AvDensity;%
-            
+
             ClusterSmooth{i,1}.Density20 = Density20;%
-            ClusterSmooth{i,1}.RelativeDensity = Density(class == i)/AvDensity;%
+            
             ClusterSmooth{i,1}.RelativeDensity20 = Density20 / AvDensity;%
             
-            ClusterSmooth{i,1}.AvRelativeDensity = mean(Density(class == i)/AvDensity);%
+            
             ClusterSmooth{i,1}.AvRelativeDensity20 = mean(Density20/AvDensity); %
 
             if DBSCANParams.UseLr_rThresh
                 ClusterSmooth{i,1}.Density = Density(class == i);%
-                
+                ClusterSmooth{i,1}.RelativeDensity = Density(class == i)/AvDensity;%
                 ClusterSmooth{i,1}.RelativeDensity = Density(class == i)/AvDensity;
                 ClusterSmooth{i,1}.Mean_Density = mean(Density(class == i));
+                ClusterSmooth{i,1}.AvRelativeDensity = mean(Density(class == i)/AvDensity);%
                  
             end
             
