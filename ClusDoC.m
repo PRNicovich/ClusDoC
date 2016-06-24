@@ -447,7 +447,9 @@ function OutputEdit(varargin)
     
     set(handles.handles.OutputText, 'String', handles.Outputfolder);
     
-    set(get(handles.handles.b_panel, 'children'), 'enable', 'off');
+    set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+    
+    guidata(handles.handles.MainFig, handles);
 
 end
 % function Load_DataSet(~, ~, ~)
@@ -1406,6 +1408,13 @@ function DBSCAN_All(~, ~, ~)
 
             for chan = 1:handles.Nchannels
                 
+                
+                if ~exist(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan)),'dir')
+                    mkdir(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan)));
+                    mkdir(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan), 'Cluster maps'));
+                    mkdir(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan), 'Cluster density maps'));
+                end
+                
                 dbscanParams.CurrentChannel = chan;
                 
                 if chan == 1
@@ -1424,11 +1433,6 @@ function DBSCAN_All(~, ~, ~)
                             handles.ROIPos((handles.ROIPos(:,1) == c) & (handles.ROIPos(:,2) == roi), 3:6));
                         dataCropped = handles.CellData{c}(cropIdx,:);
 
-                        if ~exist(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan)),'dir')
-                            mkdir(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan)));
-                            mkdir(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan), 'Cluster maps')); 
-                            mkdir(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan), 'Cluster density maps'));                        
-                        end
 
                         if ~isempty(dataCropped)
                             
@@ -1449,7 +1453,7 @@ function DBSCAN_All(~, ~, ~)
                     end % ROI
                 end % Cell
 
-                ExportDBSCANDataToExcelFiles(handles.ROIPos, Result);
+                ExportDBSCANDataToExcelFiles(handles.ROIPos, Result, strcat(handles.Outputfolder, '\DBSCAN Results'));
 
                 save(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan), ...
                                     'DBSCAN_Cluster_Result.mat'),'ClusterSmoothTable','Result','-v7.3');
@@ -1529,20 +1533,22 @@ function DoC_All(~, ~, ~)
                 handles.DoC.Lr_rRad, handles.DoC.Rmax, handles.DoC.Step, ...
                 handles.Chan1Color, handles.Chan2Color, handles.Outputfolder);
             
+            
+            
             %%%%%%%%%%%%%%%
             % Plotting, segmentation, and statistics start here
             
-            ResultTable = Fun_Map_DoC_GUIV2(handles.ROIData, Data_DoC, DensityROI, strcat(handles.Outputfolder, '\Clus-DoC Results'));
+            ResultTable = Fun_Map_DoC_GUIV2(handles.CellData, handles.ROIPos, Data_DoC, DensityROI, strcat(handles.Outputfolder, '\Clus-DoC Results'));
             
-            [ClusterTableCh1, ClusterTableCh2] = Fun_DBSCAN_DoC_GUIV2(handles.ROIData, Data_DoC, ...
+            [ClusterTableCh1, ClusterTableCh2] = Fun_DBSCAN_DoC_GUIV2(handles.CellData, handles.ROIPos, Data_DoC, ...
                 strcat(handles.Outputfolder, '\Clus-DoC Results'), handles.Chan1Color, handles.Chan2Color);
             
             % ^ Doesn't quite capture all of the stats that
             % FunDBSCAN4DoC_GUIV2.m does in ClusterTable.  Let's see
             % if/when it falls apart
             
-            Fun_Stat_DBSCAN_DoC_GUIV2(ClusterTableCh1,1);
-            Fun_Stat_DBSCAN_DoC_GUIV2(ClusterTableCh2,2);
+            Fun_Stat_DBSCAN_DoC_GUIV2(ClusterTableCh1, 1, strcat(handles.Outputfolder, '\Clus-DoC Results'));
+            Fun_Stat_DBSCAN_DoC_GUIV2(ClusterTableCh2, 2, strcat(handles.Outputfolder, '\Clus-DoC Results'));
             
             %
             %%%%%%%%%%%%%%

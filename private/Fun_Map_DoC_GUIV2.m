@@ -1,4 +1,4 @@
-function ResultTable=Fun_Map_DoC_GUIV2(ROIData,Data_DoC, DensityROI, Path_name)
+function ResultTable=Fun_Map_DoC_GUIV2(CellData, ROIPos, Data_DoC, DensityROI, Path_name)
 
 %cd('Degree_Of_Colocalisation')
 %         if exist('Statistic and Plots for Colocalization','dir')
@@ -27,8 +27,11 @@ ColoThres=0.4;
         for cell=1:size(Data_DoC,2)
             for reg=1:size(Data_DoC,1)
                 
-        
-                DataRaw=ROIData{reg,cell};
+                CurrentROI = ROIPos((ROIPos(:,1) == cell) & (ROIPos(:,2) == reg), :);
+                [~, Index_In] = Cropping_Fun(CellData{cell}(:,5:6), CurrentROI(3:6));
+                DataRaw = CellData{cell}(Index_In,:);                
+                
+                
                 Data_DoC1=Data_DoC{reg,cell};
                 DensityROI_temp=DensityROI{reg,cell};
 %%      
@@ -62,13 +65,13 @@ ColoThres=0.4;
                 if Plot1==1
 
                 figure; hold on
-                plot( DataRaw(DataRaw(:,12)==1,5), DataRaw(DataRaw(:,12)==1,6),'Marker'...
+                plot( DataRaw(DataRaw(:,12) == 1, 5), DataRaw(DataRaw(:,12) == 1, 6),'Marker'...
                                           ,'.','MarkerSize',4,'LineStyle','none','color','green');
 
-                plot( DataRaw(DataRaw(:,12)==2,5), DataRaw(DataRaw(:,12)==2,6),'Marker'...
+                plot( DataRaw(DataRaw(:,12) == 2, 5), DataRaw(DataRaw(:,12) == 2, 6),'Marker'...
                                           ,'.','MarkerSize',4,'LineStyle','none','color','red');
 
-                axis equal
+%                 axis equal
                 axis tight
                 ax = gca;
                 Xlimit=get(ax,'xlim');Ylimit=get(ax,'ylim');
@@ -379,8 +382,8 @@ ResultTable=A;
 %                     Correlation_ColocVsDensity];% PercentLrAbove05_Ch1 PercentLrAbove05_Ch2];
      
     RegionName1=strcat('DoC Results'); % name of the sheet
-    xlswrite('DoC Results',Array1,RegionName1,'A1'); %'Regiion' = name of the filename xcel shee, Array1 = data to put in the spreadsheet, 'A1' where to start
-    xlswrite('DoC Results',Matrix_Result1,RegionName1,'A2');
+    xlswrite(fullfile(Path_name, 'DoC Results'), Array1, RegionName1, 'A1'); %'Regiion' = name of the filename xcel shee, Array1 = data to put in the spreadsheet, 'A1' where to start
+    xlswrite(fullfile(Path_name, 'DoC Results'),Matrix_Result1,RegionName1,'A2');
     
     %% Density ch1 ch2
     
@@ -425,7 +428,7 @@ ResultTable=A;
 %     xlswrite('Region',Matrix_Result2,RegionName2,'A2');   
 % 
 %         
-        save('ResultTable','ResultTable');
+        save(fullfile(Path_name, 'ResultTable'),'ResultTable');
         toc      
 end    
     

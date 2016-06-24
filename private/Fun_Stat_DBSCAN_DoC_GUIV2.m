@@ -1,4 +1,4 @@
-function Fun_Stat_DBSCAN_DoC_GUIV2(ClusterSmoothTableCh,Ch)
+function Fun_Stat_DBSCAN_DoC_GUIV2(ClusterSmoothTableCh, Ch, outputFolder)
 
 % Tabulate stats and output excel file for Clus-DoC analysis
 
@@ -118,10 +118,10 @@ Result2.Circularity3=MeanCircularity3;
 switch Ch
     case 1
         ResultCh1=Result2;    
-        save('ResultCh1','ResultCh1')
+        save(fullfile(outputFolder, 'ResultCh1.mat'),'ResultCh1')
     case 2
         ResultCh2=Result2;    
-        save('ResultCh2','ResultCh2')
+        save(fullfile(outputFolder, 'ResultCh2.mat'),'ResultCh2')
 end
     
 
@@ -131,12 +131,12 @@ end
     % Density Area Circularity for cluster with DofC>0.4
     DensityDofC = cell2mat(MeanDensityDofC(:));
     AreaDofC = cell2mat(MeanAreaDofC(:));
-    CircularityDofC=cell2mat(MeanCircularityDofC(:));
+    CircularityDofC = cell2mat(MeanCircularityDofC(:));
     
     % Density Area Circularity for cluster with DofC<0.4
     Density2 = cell2mat(MeanDensity2(:));
     Area2 = cell2mat(MeanArea2(:));
-    Circularity2=cell2mat(MeanCircularity2(:));
+    Circularity2 = cell2mat(MeanCircularity2(:));
 
     
     % Density Area Circularity for cluster with Nb<10  
@@ -166,15 +166,15 @@ end
                     cell2mat(MeanNumMolsPerNonColocCluster(:)), ...
                     cell2mat(NumNonColocClustersPerROI(:))];
     
-    RegionName=strcat('Clus-DoC results');
+    RegionName = strcat('Clus-DoC results');
     
  switch Ch
     case 1
-        xlswrite('Clus-DoC Ch1',Array,RegionName,'A1');
-        xlswrite('Clus-DoC Ch1',Matrix_Result,RegionName,'A2');
+        xlswrite(fullfile(outputFolder, 'Clus-DoC Ch1.xls'), Array, RegionName, 'A1');
+        xlswrite(fullfile(outputFolder, 'Clus-DoC Ch1.xls'), Matrix_Result, RegionName, 'A2');
     case 2
-        xlswrite('Clus-DoC Ch2',Array,RegionName,'A1');
-        xlswrite('Clus-DoC Ch2',Matrix_Result,RegionName,'A2');
+        xlswrite(fullfile(outputFolder, 'Clus-DoC Ch2.xls'), Array, RegionName, 'A1');
+        xlswrite(fullfile(outputFolder, 'Clus-DoC Ch2.xls'), Matrix_Result, RegionName, 'A2');
  end
 
 

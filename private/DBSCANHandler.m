@@ -56,8 +56,8 @@ try
 
 
         %% Threshold for the DBSCAN_Nb_Neighbor on density
-        xsize = ceil (max(Data(:,1)) - min(Data(:,2)));
-        ysize = ceil (max(Data(:,1)) - min(Data(:,2)));
+        xsize = ceil (max(Data(:,1)) - min(Data(:,1)));
+        ysize = ceil (max(Data(:,2)) - min(Data(:,2)));
         SizeROI = max([xsize, ysize]);
         AvDensity = size(Data, 1)/(xsize*ysize);
         Nrandom = AvDensity*pi*DBSCANParams.Lr_rThreshRad^2;
@@ -298,7 +298,17 @@ try
             Result.Area(1) = mean(cell2mat(cellfun(@(x) x.Area(x.Nb > DBSCANParams.Cutoff), ClusterSmooth, 'UniformOutput', false)));
             Result.Mean_Circularity(1) = mean(cell2mat(cellfun(@(x) x.Circularity(x.Nb > DBSCANParams.Cutoff), ClusterSmooth, 'UniformOutput', false)));
             Result.Density = mean(cell2mat(cellfun(@(x) x.Density(x.Nb > DBSCANParams.Cutoff), ClusterSmooth, 'UniformOutput', false)));
-            Result.RelativeDensity = mean(cell2mat(cellfun(@(x) x.RelativeDensity(x.Nb > DBSCANParams.Cutoff), ClusterSmooth, 'UniformOutput', false)));
+            
+            if DBSCANParams.UseLr_rThresh
+            
+                Result.RelativeDensity = mean(cell2mat(cellfun(@(x) x.RelativeDensity(x.Nb > DBSCANParams.Cutoff), ClusterSmooth, 'UniformOutput', false)));
+                
+            else
+                
+                Result.RelativeDensity = NaN;
+                
+            end
+            
             Result.TotalNumber = size(Data,1);
             Result.Percent_in_Cluster = sum(cell2mat(cellfun(@(x) x.Nb, ClusterSmooth, 'UniformOutput', false)))/length(Data);
 

@@ -112,7 +112,7 @@ function [Data_DoC, DensityROI] = DoCHandler(ROIPos, CellData, Lr_rad, Rmax, Ste
 
     close gcf;
     
-    save( 'Data_for_Cluster_Analysis.mat','Data_DoC','DensityROI'); %ROIData removed!
+    save(fullfile(Outputfolder, 'Clus-DoC Results', 'Data_for_Cluster_Analysis.mat'),'Data_DoC','DensityROI'); %ROIData removed!
 
 
 end

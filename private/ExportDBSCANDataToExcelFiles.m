@@ -1,4 +1,4 @@
-function ExportDBSCANDataToExcelFiles(ROIPos, Result)
+function ExportDBSCANDataToExcelFiles(ROIPos, Result, outputFolder)
 
     % Formerly Final_Result_DBSCAN_GUIV2
     % Extracts and exports Results table into Excel format
@@ -24,8 +24,8 @@ function ExportDBSCANDataToExcelFiles(ROIPos, Result)
     Matrix_Result = [Percent_in_Cluster_column*100 , Number_column(:,1) , Area_column(:,1) , Density_column*1e6 ,...
         RelativeDensity_column, TotalNumber, Circularity_column, Number_Cluster_column, Number_Cluster_column./(ROIPos(:,5).*ROIPos(:,6))];
 
-    xlswrite('DBSCAN Results', ROIPos(:,1:5), 'A', 'A2');
-    xlswrite('DBSCAN Results', HeaderArray, 'A', 'A1');
-    xlswrite('DBSCAN Results', Matrix_Result, 'A', 'G2');
+    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), ROIPos(:,1:5), 'A', 'A2');
+    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), HeaderArray, 'A', 'A1');
+    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), Matrix_Result, 'A', 'G2');
 
 end
