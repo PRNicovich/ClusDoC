@@ -254,7 +254,7 @@ try
             axis tight
 
             set(ax2, 'box', 'on', 'XTickLabel', [], 'XTick', [], 'YTickLabel', [], 'YTick', [], ...
-                'XLim', [min(Data(:,5)), max(Data(:,5))], 'YLim', [min(Data(:,6)), max(Data(:,6))]);
+                'XLim', [min(Data(:,1)), max(Data(:,1))], 'YLim', [min(Data(:,2)), max(Data(:,2))]);
             set(fig2, 'Color', [1 1 1], 'Tag', 'ClusDoC')
 
             Name = strcat('Cell',num2str(p),'_Region',num2str(q), '_Density_map.tif');
