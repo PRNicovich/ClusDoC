@@ -445,7 +445,7 @@ function OutputEdit(varargin)
 
     handles.Outputfolder = uigetdir(handles.Path_name, 'Choose or Create an output folder');
     
-    set(handles.handles.OutputText, 'String', handles.OutputFolder);
+    set(handles.handles.OutputText, 'String', handles.Outputfolder);
     
     set(get(handles.handles.b_panel, 'children'), 'enable', 'off');
 
