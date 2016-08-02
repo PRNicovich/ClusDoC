@@ -9,9 +9,9 @@ function valOut = RipleyKHandler(handles, Start, End, Step, MaxSampledPts, Chan1
     
     nSteps = ceil((End - Start)/Step) + 1;
     
-	Max_Lr = zeros(length(handles.ROICoordinates{:}), handles.Nchannels); % Assuming the first cell has the same number of channels as the rest
-	Max_r = zeros(length(handles.ROICoordinates{:}), handles.Nchannels);
-	Lr_r_Result = zeros(nSteps, length(handles.ROICoordinates{:}), handles.Nchannels);
+	Max_Lr = zeros(sum(cell2mat(cellfun(@length, handles.ROICoordinates, 'uniformoutput', false))), handles.Nchannels); % Assuming the first cell has the same number of channels as the rest
+	Max_r = zeros(sum(cell2mat(cellfun(@length, handles.ROICoordinates, 'uniformoutput', false))), handles.Nchannels);
+	Lr_r_Result = zeros(nSteps, sum(cell2mat(cellfun(@length, handles.ROICoordinates, 'uniformoutput', false))), handles.Nchannels);
 
     for cellIter = 1:length(handles.CellData) % cell number
 
