@@ -311,6 +311,8 @@ function initializeParameters(varargin)
     handles.ROIPos = [];
     handles.CurrentCellData = 1;
     handles.CurrentROIData = [];
+    
+    handles.Path_name = pwd;
 
     % Default ROI settings
     handles.ROISize = 4000; % Length of ROI, in nm
