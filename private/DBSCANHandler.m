@@ -1,4 +1,4 @@
-function [datathr, ClusterSmooth, SumofContour, varargout] = DBSCANHandler(Data, DBSCANParams, varargin)
+function [datathr, ClusterSmooth, SumofContour, classOut, varargout] = DBSCANHandler(Data, DBSCANParams, varargin)
 
 try 
 
@@ -9,6 +9,8 @@ try
         % Inputs are Data for this ROI, DBSCAN parameters (handles.DBSCAN
         % structure) and varargin for display (cellNum, roiNum, display1,
         % display2)
+        
+        classOut = zeros(size(Data, 1), 1);
 
         if nargin == 2
             % Test mode
@@ -84,11 +86,13 @@ try
 
             %       Include the points count in the search radius r for a point of interest
 
-            datathr = data(unique(cell2mat(idx(data(:,3) > Lr_Threshold)')),:);
+            dataThreshVector = unique(cell2mat(idx(data(:,3) > Lr_Threshold)'));
+            datathr = data(dataThreshVector, :);
 
             Density = datathr(:,6);
         else
-            datathr = Data(:,1:2);
+            dataThreshVector = true(size(Data, 1), 1);
+            datathr = Data(dataThreshVector, 1:2);
         end
 
         % Data4dbscan = datathr(:,1:2);
@@ -98,6 +102,8 @@ try
         % FAST DBSCAN CALL
 
         class = t_dbscan(datathr(:,1), datathr(:, 2), DBSCANParams.minPts, DBSCANParams.epsilon, DBSCANParams.threads);
+        classOut(dataThreshVector) = class;
+        classOut(~dataThreshVector) = -1;
 
         SumofBigContour=[];
         SumofSmallContour=[];
@@ -155,7 +161,10 @@ try
 
                 if Nb_In > 1
                     Density20_In = Density20(DoCScore(class == i) >= DBSCANParams.DoCThreshold);
-                    [Contour_In] = Smoothing_fun4clusterV3_3(Point_In, 0,0);
+%                     [Contour_In] = Smoothing_fun4clusterV3_3(Point_In, 0,0);
+                    
+                    [~,  ~, ~, ~, Contour_In, ~, ~] = Smoothing_fun4cluster(Point_In, DBSCANParams, 0, 0);
+
                     Area_In = polyarea(Contour_In(:,1),Contour_In(:,2));
 
 
@@ -220,7 +229,7 @@ try
              set(ax1, 'box', 'on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
              set(fig1, 'Color', [1 1 1], 'Tag', 'ClusDoC')
              if printOutFig
-                print(fullfile(DBSCANParams.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', DBSCANParams.CurrentChannel), 'Cluster maps', Name), fig1, '-dtiff');
+                print(fullfile(DBSCANParams.Outputfolder, 'Clus-DoC Results\DBSCAN Results', sprintf('Ch%d', DBSCANParams.CurrentChannel), 'Cluster maps', Name), fig1, '-dtiff');
                 close(fig1);
              end
 
@@ -328,6 +337,37 @@ catch mError
 end
 
 
+end
+
+% Adding Lr_fun here to avoid issues with private function calls
+
+function [ data,idx,Dis,Density] = Lr_fun(X1, Y1, X2, Y2, r, SizeROI)
+
+% SizeROI= size of the square (inmost case 4000nm)
+       
+        if isempty(X1) || isempty(X2)
+            data = [];
+            idx = [];
+            Dis = [];
+            Density = [];
+        else
+            
+           if length(X1) ~= length(X2) 
+               k = 0;
+           elseif X1 ~= X2
+               k = 0;
+           elseif X1 == X2
+               k = 1;
+           end
+               
+        [idx, Dis] = rangesearch([X1, Y1], [X2, Y2], r); % find element of [x y] in a raduis of r from element of [x y]
+        Kfuncans = cellfun('length', idx) - k;     % remove the identity
+        Density = cellfun('length', idx) / (pi*r^2); %/(length(X2)/SizeROI^2); % Relative Density
+        
+        Lr = ((SizeROI)^2*Kfuncans / (length(X2) - 1)/pi).^0.5;     % calculate L(r)
+        data=[X2, Y2, Lr];
+
+        end 
 end
 
 

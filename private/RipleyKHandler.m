@@ -1,9 +1,7 @@
-function valOut = RipleyKHandler(ROIPos, CellData, Start, End, Step, MaxSampledPts, Chan1Color, Chan2Color, Fun_OutputFolder_name)
+function valOut = RipleyKHandler(handles, Start, End, Step, MaxSampledPts, Chan1Color, Chan2Color, Fun_OutputFolder_name)
 
 % Handler function for RipleyK calculations
-    
-    cellList = unique(ROIPos(:,1));
-    ROIList = unique(ROIPos(:,2)); % If multiple cells don't share ROIs...what happens here?
+
 
     ArrayHeader = [{'r'},{'L(r)-r'}];
 
@@ -11,75 +9,83 @@ function valOut = RipleyKHandler(ROIPos, CellData, Start, End, Step, MaxSampledP
     
     nSteps = ceil((End - Start)/Step) + 1;
     
-    uniqueROIs = unique(ROIPos(:,1:2), 'rows');
-    
-	Max_Lr = zeros(size(uniqueROIs, 1), max(unique(CellData{1}(:,12)))); % Assuming the first cell has the same number of channels as the rest
-	Max_r = zeros(size(uniqueROIs, 1), max(unique(CellData{1}(:,12))));
-	Lr_r_Result = zeros(nSteps, size(uniqueROIs, 1), max(unique(CellData{1}(:,12))));
+	Max_Lr = zeros(length(handles.ROICoordinates{:}), handles.Nchannels); % Assuming the first cell has the same number of channels as the rest
+	Max_r = zeros(length(handles.ROICoordinates{:}), handles.Nchannels);
+	Lr_r_Result = zeros(nSteps, length(handles.ROICoordinates{:}), handles.Nchannels);
 
-    for cellIter = 1:numel(cellList) % cell number
+    for cellIter = 1:length(handles.CellData) % cell number
 
-        for roiIter = 1:numel(ROIList) % ROI number
+        for roiIter = 1:length(handles.ROICoordinates{cellIter}) % ROI number
             
-            q = ROIList(roiIter);
-            p = cellList(cellIter);
+            if ~isempty(handles.ROICoordinates{cellIter})
             
-            roiHere = ROIPos((ROIPos(:,1) == p) & (ROIPos(:,2) == q), 3:6);
-            [ ~, cropIdx] = Cropping_Fun(CellData{p}(:,5:6), roiHere);
-            dataCropped = CellData{p}(cropIdx,:);
+                q = roiIter;
+                p = cellIter;
 
-            if ~isempty(dataCropped)
-                i=i+1;
 
-                ROIsize = ROIPos((ROIPos(:,1) == p) & (ROIPos(:,2) == q), 5:6);
+                CurrentROI = handles.ROICoordinates{handles.CurrentCellData}{handles.CurrentROIData};
+                CurrentROI = [CurrentROI(1,1),  CurrentROI(1,2), max(CurrentROI(:,1)) - min(CurrentROI(:,1)), max(CurrentROI(:,2)) - min(CurrentROI(:,2))];
 
-                size_ROI = max(ROIsize(:))*[1 1];
-                A = max(ROIsize(:)).^2;
 
-                % Calculate RipleyK for this cell + ROI w/ Channel 1
-                % data
+                whichPointsInROI = fliplr(dec2bin(handles.CellData{cellIter}(:,handles.NDataColumns + 1)));
+                whichPointsInROI = whichPointsInROI(:,roiIter) == '1';
 
-                selectNums = randsample(1:size(dataCropped, 1), MaxSampledPts);
-                selectVector = false(size(dataCropped, 1), 1);
-                selectVector(selectNums) = true;
+                dataCropped = handles.CellData{cellIter}(whichPointsInROI, :);
 
-                for chan = unique(dataCropped(:,12))'
+                if ~isempty(dataCropped)
                     
-                    if chan == 1
-                        plotColor = Chan1Color;
-                    elseif chan == 2
-                        plotColor = Chan2Color;
+                    i=i+1;
+
+                    size_ROI = CurrentROI(3:4);
+                    A = polyarea(handles.ROICoordinates{handles.CurrentCellData}{handles.CurrentROIData}(:,1), ...
+                        handles.ROICoordinates{handles.CurrentCellData}{handles.CurrentROIData}(:,2));
+
+                    % Calculate RipleyK for this cell + ROI w/ Channel 1
+                    % data
+
+                    selectNums = randsample(1:size(dataCropped, 1), MaxSampledPts);
+                    selectVector = false(size(dataCropped, 1), 1);
+                    selectVector(selectNums) = true;
+
+                    for chan = unique(dataCropped(:,12))'
+
+                        if chan == 1
+                            plotColor = Chan1Color;
+                        elseif chan == 2
+                            plotColor = Chan2Color;
+                        end
+
+                        [r, Lr_r] = RipleyKFun(dataCropped(selectVector & (dataCropped(:,12) == chan),5:6), ...
+                            A, Start, End, Step, size_ROI);
+
+                        handles.handles.RipleyKCh1Fig = figure('color', [1 1 1]);
+                        handles.handles.RipleyKCh1Ax = axes('parent', handles.handles.RipleyKCh1Fig);
+                        plot(handles.handles.RipleyKCh1Ax, r, Lr_r, 'color', plotColor, 'linewidth', 2);
+
+
+                        % Collect results from these calculations
+                        [MaxLr_r, Index] = max(Lr_r);
+                        Max_Lr(i, chan) = MaxLr_r;
+                        Max_r(i, chan) = r(Index);
+                        Lr_r_Result(:,i, chan) = Lr_r;
+
+                        annotation('textbox', [0.45,0.8,0.22,0.1],...
+                            'String', sprintf('Max L(r) - r: %.3f at Max r : %d', MaxLr_r, Max_r(i)), ...
+                            'FitBoxToText','on');
+                        xlabel(handles.handles.RipleyKCh1Ax, 'r (nm)', 'fontsize', 12);
+                        ylabel(handles.handles.RipleyKCh1Ax, 'L(r) - r', 'fontsize', 12);
+
+                        print(fullfile(Fun_OutputFolder_name, 'RipleyK Plots', sprintf('Ch%d', chan), sprintf('Ripley_%dRegion_%d.tif', p, q)), ...
+                            handles.handles.RipleyKCh1Fig, '-dtiff');
+                        close(handles.handles.RipleyKCh1Fig);
+
+                        Matrix_Result = [r, Lr_r];
+                        SheetName = sprintf('Cell_%dRegion_%d', p, q);
+                        xlswrite(fullfile(Fun_OutputFolder_name, 'RipleyK Results', sprintf('Ch%d', chan), 'RipleyK Results.xls'), ArrayHeader, SheetName, 'A1');
+                        xlswrite(fullfile(Fun_OutputFolder_name, 'RipleyK Results', sprintf('Ch%d', chan), 'RipleyK Results.xls'), Matrix_Result, SheetName, 'A2');
                     end
-
-                    [r, Lr_r] = RipleyKFun(dataCropped(selectVector & (dataCropped(:,12) == chan),5:6), ...
-                        A, Start, End, Step, size_ROI);
-
-                    handles.handles.RipleyKCh1Fig = figure('color', [1 1 1]);
-                    handles.handles.RipleyKCh1Ax = axes('parent', handles.handles.RipleyKCh1Fig);
-                    plot(handles.handles.RipleyKCh1Ax, r, Lr_r, 'color', plotColor, 'linewidth', 2);
-
-
-                    % Collect results from these calculations
-                    [MaxLr_r, Index] = max(Lr_r);
-                    Max_Lr(i, chan) = MaxLr_r;
-                    Max_r(i, chan) = r(Index);
-                    Lr_r_Result(:,i, chan) = Lr_r;
-
-                    annotation('textbox', [0.45,0.8,0.22,0.1],...
-                        'String', sprintf('Max L(r) - r: %.3f at Max r : %d', MaxLr_r, Max_r(i)), ...
-                        'FitBoxToText','on');
-                    xlabel(handles.handles.RipleyKCh1Ax, 'r (nm)', 'fontsize', 12);
-                    ylabel(handles.handles.RipleyKCh1Ax, 'L(r) - r', 'fontsize', 12);
-
-                    print(fullfile(Fun_OutputFolder_name, 'RipleyK Plots', sprintf('Ch%d', chan), sprintf('Ripley_%dRegion_%d.tif', p, q)), ...
-                        handles.handles.RipleyKCh1Fig, '-dtiff');
-                    close(handles.handles.RipleyKCh1Fig);
-
-                    Matrix_Result = [r, Lr_r];
-                    SheetName = sprintf('Cell_%dRegion_%d', p, q);
-                    xlswrite(fullfile(Fun_OutputFolder_name, 'RipleyK Results', sprintf('Ch%d', chan), 'RipleyK Results.xls'), ArrayHeader, SheetName, 'A1');
-                    xlswrite(fullfile(Fun_OutputFolder_name, 'RipleyK Results', sprintf('Ch%d', chan), 'RipleyK Results.xls'), Matrix_Result, SheetName, 'A2');
                 end
+                
             end
 
         end
@@ -87,7 +93,7 @@ function valOut = RipleyKHandler(ROIPos, CellData, Start, End, Step, MaxSampledP
 
 
 
-    for chan = unique(CellData{1}(:,12))'
+    for chan = 1:handles.Nchannels
         
         Average_Lr_r(:,1) = r;
         Average_Lr_r(:,1) = r;

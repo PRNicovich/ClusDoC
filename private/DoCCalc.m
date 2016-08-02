@@ -1,13 +1,13 @@
-function [Data_DegColoc, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
+function [dataOut, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
 
 
     %%%%%%% Threshold measure at the randomness
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     fprintf(1, 'Segment clustered points from background... \n');
 
-    SizeROI = max(roiHere(3:4));
+    SizeROI = polyarea(roiHere(:,1), roiHere(:,2));
 
-    dataOut = zeros(size(Data, 1), 7);
+    dataOut = zeros(size(Data, 1), 8);
     dataOut(:,4) = Data(:,12);
 
     % All the value (data, idx, Dis, Density) are calculated for the
@@ -21,29 +21,39 @@ function [Data_DegColoc, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
     [~, ~, ~, dataOut(dataOut(:,4) == 2, 7) ] = Lr_Subfun(Data(Data(:,12) == 2,5), Data(Data(:,12) == 2,6), ...
         Data(Data(:,12) == 2,5), Data(Data(:,12) == 2,6), Lr_rad, SizeROI);   
 
-    % Split data up to reduce overhead passed to workers
-    x1 = dataOut(dataOut(:,4) == 1, 1);
-    y1 = dataOut(dataOut(:,4) == 1, 2); 
+    % Pass along data that meet threshold criteria
+    % Original threshold is so convoluted that it basically equals Lr_rad.
+    % Lr_Threshold should be number of points within Lr_r for a random
+    % distrubution of the same number of points in the current ROI
+    Lr_Threshold = (size(Data, 1)/SizeROI)*pi*Lr_rad^2;
+    
+    
+    %Nrandom = (size(Data, 1)/SizeROI)*pi*Lr_rad^2; % Number of particles per Lr_rad circle expected
+    %Lr_Threshold = ((SizeROI)*Nrandom/(size(Data, 1) - 1)/pi).^0.5;
+    dataOut(:,8) = dataOut(:,3) > Lr_Threshold; % Particle has Lr_r score above that of a random distribution
+    
+    x1 = dataOut((dataOut(:,4) == 1) & (dataOut(:,8) == 1), 1);
+    y1 = dataOut((dataOut(:,4) == 1) & (dataOut(:,8) == 1), 2);
 
-    x2 = dataOut(dataOut(:,4) == 2, 1);
-    y2 = dataOut(dataOut(:,4) == 2, 2); 
+    x2 = dataOut((dataOut(:,4) == 2) & (dataOut(:,8) == 1), 1);
+    y2 = dataOut((dataOut(:,4) == 2) & (dataOut(:,8) == 1), 2);
 
 
     %[idx1,Dis]=rangesearch([x1 y1],[x1 y1],Rmax);
     %D1max=(cellfun(@length,idx1)-1)/(Rmax^2);
-    D1max = sum(dataOut(:,4) == 1)/SizeROI^2;
+    D1max = sum((dataOut(:,4) == 1) & (dataOut(:,8) == 1))/SizeROI^2;
 
     %[idx2,Dis]=rangesearch([x2 y2],[x1 y1],Rmax);
     %D2max=(cellfun(@length,idx2))/(Rmax^2);
-    D2maxCh1Ch2 = sum(dataOut(:,4) == 2)/SizeROI^2; % why is this defined one
+    D2maxCh1Ch2 = sum((dataOut(:,4) == 2) & (dataOut(:,8) == 1))/SizeROI^2; % why is this defined one
 
     D2maxCh2Ch1 = (cellfun(@length, rangesearch([x1 y1], [x2 y2], Rmax)))/(Rmax^2); % check for Ch2 points that are Rmax within Ch1
 
     %i=0;
-    N11 = zeros(sum(dataOut(:,4) == 1), ceil(Rmax/Step));
-    N12 = zeros(sum(dataOut(:,4) == 1), ceil(Rmax/Step));
-    N22 = zeros(sum(dataOut(:,4) == 2), ceil(Rmax/Step));
-    N21 = zeros(sum(dataOut(:,4) == 2), ceil(Rmax/Step));
+    N11 = zeros(numel(x1), ceil(Rmax/Step));
+    N12 = zeros(numel(x1), ceil(Rmax/Step));
+    N22 = zeros(numel(x2), ceil(Rmax/Step));
+    N21 = zeros(numel(x2), ceil(Rmax/Step));
     
     tic
     
@@ -88,11 +98,12 @@ function [Data_DegColoc, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
 %     SA2a = SA2;
     SA2(isnan(SA2)) = 0;
 
+    % DoC Assignment
     [~, NND1] = knnsearch([x2 y2], [x1 y1]);
-    dataOut(dataOut(:,4) == 1, 6) = SA1.*exp(-NND1/Rmax);
+    dataOut((dataOut(:,4) == 1) & (dataOut(:,8) == 1), 6) = SA1.*exp(-NND1/Rmax);
 
     [~, NND2] = knnsearch([x1 y1], [x2 y2]);
-    dataOut(dataOut(:,4) == 2, 6) = SA2.*exp(-NND2/Rmax);
+    dataOut((dataOut(:,4) == 2) & (dataOut(:,8) == 1), 6) = SA2.*exp(-NND2/Rmax);
 
 %     DoCcoef.SA1a = SA1a; 
 %     DoCcoef.SA1 = SA1;
@@ -104,9 +115,18 @@ function [Data_DegColoc, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
 
     toc
 
-    dataOut = array2table(dataOut,'VariableNames',{'X' 'Y' 'Lr' 'Ch' 'Density' 'DoC' 'D1_D2'});
+    % dataOut(:,1) = X - X position
+    % dataOut(:,2) = Y - Y position
+    % dataOut(:,3) = Lr - Lr value at radius r
+    % dataOut(:,4) = Ch - Channel
+    % dataOut(:,5) = Density - relative density, number of points inside RipleyK filter radius, ALL CHANNELS
+    % dataOut(:,6) = DoC - Cross-channel Degree of colocalization
+    % dataOut(:,7) = D1_D2 - num points inside RipleyK filter radius, SAME CHANNEL
+    
+    
+    dataOut = array2table(dataOut,'VariableNames',{'X' 'Y' 'Lr' 'Ch' 'Density' 'DoC' 'D1_D2' 'Lr_rAboveThresh'});
 
-    Data_DegColoc = dataOut;% dataOut=[X Y Lr Kf Ch Density ColocalCoef]
+%     Data_DegColoc = dataOut;% dataOut=[X Y Lr Kf Ch Density ColocalCoef]
         
 end
 
@@ -131,12 +151,12 @@ function [ data,idx,Dis,Density] = Lr_Subfun(X1, Y1, X2, Y2, r, SizeROI)
                k = 1;
            end
                
-        [idx, Dis] = rangesearch([X1, Y1], [X2, Y2], r); % find element of [x y] in a raduis of r from element of [x y]
-        Kfuncans = cellfun('length', idx) - k;     % remove the identity
-        Density = cellfun('length', idx) / (pi*r^2); %/(length(X2)/SizeROI^2); % Relative Density
-        
-        Lr = ((SizeROI)^2*Kfuncans / (length(X2) - 1)/pi).^0.5;     % calculate L(r)
-        data=[X2, Y2, Lr];
+            [idx, Dis] = rangesearch([X1, Y1], [X2, Y2], r); % find element of [x y] in a raduis of r from element of [x y]
+            Kfuncans = cellfun('length', idx) - k;     % remove the identity
+            Density = cellfun('length', idx) / (pi*r^2); %/(length(X2)/SizeROI^2); % Relative Density
+
+            Lr = ((SizeROI)^2*Kfuncans / (length(X2) - 1)/pi).^0.5;     % calculate L(r)
+            data=[X2, Y2, Lr];
 
         end 
 end

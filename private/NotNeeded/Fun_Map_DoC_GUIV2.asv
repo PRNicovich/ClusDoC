@@ -1,4 +1,4 @@
-function ResultTable=Fun_Map_DoC_GUIV2(ROIData,Data_DoC, DensityROI, Path_name)
+function ResultTable=Fun_Map_DoC_GUIV2(CellData, NDatacolumns, ROICoordinates, DensityROI, Path_name, ColoThres)
 
 %cd('Degree_Of_Colocalisation')
 %         if exist('Statistic and Plots for Colocalization','dir')
@@ -20,16 +20,32 @@ Plot4=0; % Colocalistion with Threshold: 2 colors 'No Outliers' threshold with c
          %
 Plot5=1; % 1 colors , 'Outliers' colocalisation map + density map independant for each color
 
-
-ColoThres=0.4;
 %%
+
+Result = struct('Correlation_Coloc1_vs_Density1', [], 'Correlation_Coloc2_vs_Density2', [], ...
+                'Percent_Ch1_ColocAbove04', [], 'Percent_Ch2_ColocAbove04', [], ...
+                'AvNorm_DensityAbove04', [], 'AvRela_DensityAbove04', [], ...
+                'AvNorm_DensityBelow04', [], 'AvRela_DensityBelow04', [], ...
+                'Correlation_ColocVsDensity', [], ...
+                'Av_Rela_Density_Ch1', [], 'AvNorm_Density_Ch1', [], ...
+                'Av_DensityAbove04_Ch1', [], 'Av_Rela_DensityAbove04_Ch1', [], 'AvNorm_DensityAbove04_Ch1', [], ...
+                'Av_DensityBelow04_Ch1', [], 'Av_Rela_DensityBelow04_Ch1', [], 'AvNorm_DensityBelow04_Ch1', [], ...
+                'Av_Rela_Density_Ch2', [], 'AvNorm_Density_Ch2', [], ...
+                'Av_DensityAbove04_Ch2', [], 'Av_Rela_DensityAbove04_Ch2', [], 'AvNorm_DensityAbove04_Ch2', [], ...
+                'Av_DensityBelow04_Ch2', [], 'Av_Rela_DensityBelow04_Ch2', [], 'AvNorm_DensityBelow04_Ch2', []);
+
         
-        for cell=1:size(Data_DoC,2)
-            for reg=1:size(Data_DoC,1)
+        for cell = 1:size(CellData, 1)
                 
-        
-                DataRaw=ROIData{reg,cell};
-                Data_DoC1=Data_DoC{reg,cell};
+            for reg = 1:size(ROICoordinates{cell}, 1)
+
+                % Since which ROI a point falls in is encoded in binary, decode here
+                whichPointsInROI = fliplr(dec2bin(CellData{cell}(:, NDatacolumns + 1)));
+                whichPointsInROI = whichPointsInROI(:, reg) == '1';
+                
+                DataRaw = CellData{cell}(whichPointsInROI, :);
+
+                Data_DoC1 = DataRaw(DataRaw(:, NDatacolumns + 7) == 1);
                 DensityROI_temp=DensityROI{reg,cell};
 %%      
                 if ~isempty(Data_DoC1)
@@ -38,69 +54,63 @@ ColoThres=0.4;
                 % test Not a number value in column 5 6 and 12 (x y channel)
                 
                 TF=ismissing(Data_DoC1(:,:));
-                [row col]=find(TF==1);
+                [row, col]=find(TF==1);
                 Data_DoC1(row,:)=[];
                 
 %                 [col row]=find(isnan(DataNoOutliers(:,:)));
 %                 DataNoOutliers(col,:)=[];
 
                 
-                x1=Data_DoC1.X(Data_DoC1.Ch==1); %  data from channel 1
+                x1=Data_DoC1(Data_DoC1=1); %  data from channel 1
                 y1=Data_DoC1.Y(Data_DoC1.Ch==1); %  data from channel 2
                 x2=Data_DoC1.X(Data_DoC1.Ch==2);
                 y2=Data_DoC1.Y(Data_DoC1.Ch==2);
 
-                x=Data_DoC1.X;
-                y=Data_DoC1.Y;
-                Lr=Data_DoC1.Lr;
-                ch=Data_DoC1.Ch;
-                d=Data_DoC1.Density; % Local Absolute Density
-                Colo=Data_DoC1.DoC;
-                D1_D2=Data_DoC1.D1_D2; % Local Absolute Density per Channel
+%                 D1_D2 = Data_DoC1.D1_D2; % Local Absolute Density per Channel
 
                 % Plotting Raw Data 2 colors
                 if Plot1==1
 
                 figure; hold on
-                plot( DataRaw(DataRaw(:,12)==1,5), DataRaw(DataRaw(:,12)==1,6),'Marker'...
+                plot( DataRaw(DataRaw(:,12) == 1, 5), DataRaw(DataRaw(:,12) == 1, 6),'Marker'...
                                           ,'.','MarkerSize',4,'LineStyle','none','color','green');
 
-                plot( DataRaw(DataRaw(:,12)==2,5), DataRaw(DataRaw(:,12)==2,6),'Marker'...
+                plot( DataRaw(DataRaw(:,12) == 2, 5), DataRaw(DataRaw(:,12) == 2, 6),'Marker'...
                                           ,'.','MarkerSize',4,'LineStyle','none','color','red');
 
-                axis equal
+%                 axis equal
                 axis tight
                 ax = gca;
-                Xlimit=get(ax,'xlim');Ylimit=get(ax,'ylim');
+                Xlimit = get(ax,'xlim');Ylimit = get(ax,'ylim');
                 set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
                 set(gcf,'Color',[1 1 1])
                 
-                saveas(gcf, fullfile(Path_name, f1, 'Raw data maps', stract(GenericName ,'Raw_data')), 'tif');
+                saveas(gcf, fullfile(Path_name, f1, 'Raw data maps', strcat(GenericName ,'Raw_data')), 'tif');
                 close gcf
                 
                 end
 
                 % Plotting Remove outliers Data 2colors 
 
-                if Plot2==1
-                figure;  hold on 
-                plot( DataRaw(:,5), DataRaw(:,6),'Marker','.','MarkerSize',4,'LineStyle','none','color','black');
-                plot( x1, y1,'Marker','.','MarkerSize',4,'LineStyle','none','color','green');
-                plot( x2, y2,'Marker','.','MarkerSize',4,'LineStyle','none','color','red');
-                axis equal
-                axis tight
-                ax = gca;
-                Xlimit=get(ax,'xlim');Ylimit=get(ax,'ylim');
-                set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
-                set(gcf,'Color',[1 1 1])
-                saveas(gcf, fullfile(Path_name, f1, 'Raw data maps with outliers removed', stract(GenericName ,'Outliers')), 'tif');
-                close gcf
+                if Plot2 == 1
+                    figure;  hold on 
+                    plot( DataRaw(:,5), DataRaw(:,6),'Marker','.','MarkerSize',4,'LineStyle','none','color','black');
+                    plot( x1, y1,'Marker','.','MarkerSize',4,'LineStyle','none','color','green');
+                    plot( x2, y2,'Marker','.','MarkerSize',4,'LineStyle','none','color','red');
+                    axis equal
+                    axis tight
+                    ax = gca;
+                    Xlimit=get(ax,'xlim');Ylimit=get(ax,'ylim');
+                    set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
+                    set(gcf,'Color',[1 1 1])
+                    saveas(gcf, fullfile(Path_name, f1, 'Raw data maps with outliers removed', strcat(GenericName ,'Outliers')), 'tif');
+                    close gcf
                 end
 
           %%    Map of Degree of Colocalisation and Density (+ Normalisation)
           
-                dn=d./max(d);
-                D1_D2_Norm=D1_D2/max(D1_D2);
+                Data_CoC1.NormDensity = Data_DoC1.Density./max(Data_DoC1.Density);
+%                 D1_D2_Norm = Data_DoC1.D1_D2/max(Data_DoC1.D1_D2);
                 %zn=Colo./max(Colo);
                 %prod=dn.*zn; % Product no used
 
@@ -180,18 +190,18 @@ ColoThres=0.4;
                 %% 1 colors density map, 'Outliers' independant for each color
                 
                 % Channel Ch1
-                D1=Data_DoC1.D1_D2(Data_DoC1.Ch==1);
-                DoC1=Data_DoC1.DoC (Data_DoC1.Ch==1);
-                D1_Norm=D1/max(D1);
+                D1 = Data_DoC1.D1_D2(Data_DoC1.Ch == 1);
+                DoC1 = Data_DoC1.DoC(Data_DoC1.Ch == 1);
+                D1_Norm = D1/max(D1);
                 
-                Result.Correlation_Coloc1_vs_Density1=corr(D1,DoC1,'Type','Spearman');
+                Result.Correlation_Coloc1_vs_Density1 = corr(D1, DoC1, 'Type', 'Spearman');
                 
                 % Channel Ch2                
-                D2=Data_DoC1.D1_D2(Data_DoC1.Ch==2);
-                DoC2=Data_DoC1.DoC (Data_DoC1.Ch==2);
-                D2_Norm=D2/max(D2);
+                D2 = Data_DoC1.D1_D2(Data_DoC1.Ch == 2);
+                DoC2 = Data_DoC1.DoC (Data_DoC1.Ch == 2);
+                D2_Norm = D2/max(D2);
                 
-                Result.Correlation_Coloc2_vs_Density2=corr(D2,DoC2,'Type','Spearman');
+                Result.Correlation_Coloc2_vs_Density2 = corr(D2, DoC2, 'Type', 'Spearman');
                                 
 %%                                                
                 if Plot5==1
@@ -209,7 +219,7 @@ ColoThres=0.4;
                     set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
                     set(gcf,'Color',[1 1 1])
                     tt = getframe(gcf);
-                    imwrite(tt.cdata, fullfile(Path_name, f1, 'Density and DoC maps', 'Ch1', sprintf('%sDensity_Ch%d.tif', GenericName, 1)));
+                    imwrite(tt.cdata, fullfile(Path_name, f1, 'Density and DoC maps', sprintf('%sDensity_Ch%d.tif', GenericName, 1)));
                     %saveas(gcf,strcat('Plot6\',GenericName ,'Plot6',strcat('_Ch',num2str(i))), 'tif');
                     close gcf
                     
@@ -224,9 +234,7 @@ ColoThres=0.4;
                     set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
                     set(gcf,'Color',[1 1 1])
                     tt = getframe(gcf);
-                    imwrite(tt.cdata, fullfile(Path_name, f1, 'Density and DoC maps', 'Ch1', sprintf('%sDensity_Ch%d.tif', GenericName, 1)));
-                    imwrite(tt.cdata, strcat('Colocalisation and Density map per Ch\'...
-                        ,GenericName ,'Density_Ch',num2str(2),'.tif'))
+                    imwrite(tt.cdata, fullfile(Path_name, f1, 'Density and DoC maps', sprintf('%sDensity_Ch%d.tif', GenericName, 2)));
                     %saveas(gcf,strcat('Plot6\',GenericName ,'Plot6',strcat('_Ch',num2str(i))), 'tif');
                     close gcf
                     
@@ -241,8 +249,7 @@ ColoThres=0.4;
                     set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
                     set(gcf,'Color',[1 1 1])
                     tt = getframe(gcf);
-                    imwrite(tt.cdata, strcat('Colocalisation and Density map per Ch\'...
-                        ,GenericName ,'DoC_Ch',num2str(1),'.tif'))
+                    imwrite(tt.cdata, fullfile(Path_name, f1, 'Density and DoC maps', sprintf('%sDoC_Ch%d.tif', GenericName, 1)));
                     %saveas(gcf,strcat('Plot6\',GenericName ,'Plot6',strcat('_Ch',num2str(i))), 'tif');
                     close gcf
                     
@@ -257,8 +264,7 @@ ColoThres=0.4;
                     set(gca, 'box','on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
                     set(gcf,'Color',[1 1 1])
                     tt = getframe(gcf);
-                    imwrite(tt.cdata, strcat('Colocalisation and Density map per Ch\'...
-                        ,GenericName ,'DoC_Ch',num2str(2),'.tif'))
+                    imwrite(tt.cdata, fullfile(Path_name, f1, 'Density and DoC maps', sprintf('%sDoC_Ch%d.tif', GenericName, 2)));
                     %saveas(gcf,strcat('Plot6\',GenericName ,'Plot6',strcat('_Ch',num2str(i))), 'tif');
                     close gcf
                 end
@@ -266,17 +272,27 @@ ColoThres=0.4;
                 %% Result Part
                 
                 % Percentage of molecules above the threshold
-
-                Result.Percent_Ch1_ColocAbove04=length(x(Colo>=ColoThres & ch==1))/length( x(ch==1)); % 
-                Result.Percent_Ch2_ColocAbove04=length(x(Colo>=ColoThres & ch==2))/length( x(ch==2));  %
+%                 
+%                 assignin('base', 'Data_DoC1', Data_DoC1);
+%                 assignin('base', 'Result', Result);
+% 
+%                 disp('line278');
+%                 
+%                 whos Data_DoC1
+%                 whos ColoThres
+                                
+                Result.Percent_Ch1_ColocAbove04 = sum((Data_DoC1.DoC >= ColoThres) & Data_DoC1.Ch == 1) / sum(Data_DoC1.Ch == 1); % 
+                Result.Percent_Ch2_ColocAbove04 = sum((Data_DoC1.DoC >= ColoThres) & Data_DoC1.Ch == 2) / sum(Data_DoC1.Ch == 2); % ;  %
+                
+%                 disp('line283');
                 
                 % Density Ch1 + Ch2
-                Result.AvNorm_DensityAbove04=mean(dn(Colo>=ColoThres));
-                Result.AvRela_DensityAbove04=mean(d(Colo>=ColoThres)/DensityROI_temp(1));
-                Result.AvNorm_DensityBelow04=mean(dn(Colo<ColoThres));
-                Result.AvRela_DensityBelow04=mean(d(Colo<ColoThres)/DensityROI_temp(1));
+                Result.AvNorm_DensityAbove04 = mean(Data_CoC1.NormDensity(Data_DoC1.DoC >= ColoThres));
+                Result.AvRela_DensityAbove04 = mean(Data_DoC1.Density(Data_DoC1.DoC >= ColoThres) / DensityROI_temp(1));
+                Result.AvNorm_DensityBelow04 = mean(Data_CoC1.NormDensity(Data_DoC1.DoC < ColoThres));
+                Result.AvRela_DensityBelow04 = mean(Data_DoC1.Density(Data_DoC1.DoC < ColoThres) / DensityROI_temp(1));
                 
-                Result.Correlation_ColocVsDensity=corr(d,Colo,'Type','Spearman');
+                Result.Correlation_ColocVsDensity = corr(Data_DoC1.Density, Data_DoC1.DoC, 'Type', 'Spearman');
                 
                 % Lr Above threshold channel 1
                 
@@ -292,49 +308,49 @@ ColoThres=0.4;
                 %%  Calculate the average normalised density for individual channel above/beow the threshold (0.4)
 
                 % Channel 1
-                D1=Data_DoC1.D1_D2(Data_DoC1.Ch==1);
-                Result.Av_Rela_Density_Ch1=mean(D1/DensityROI_temp(2));
-                Result.AvNorm_Density_Ch1=mean(D1_Norm);
+                D1 = Data_DoC1.D1_D2(Data_DoC1.Ch == 1);
+                Result.Av_Rela_Density_Ch1 = mean(D1 / DensityROI_temp(2));
+                Result.AvNorm_Density_Ch1 = mean(D1_Norm);
                 
                 % Above threshold
-                D1_above_04=Data_DoC1.D1_D2(Data_DoC1.Ch==1 & Data_DoC1.DoC>=ColoThres);
+                D1_above_04 = Data_DoC1.D1_D2((Data_DoC1.Ch == 1) & Data_DoC1.DoC >= ColoThres);
                 
-                Result.Av_DensityAbove04_Ch1=mean(D1_above_04);
-                Result.Av_Rela_DensityAbove04_Ch1=mean(D1_above_04/DensityROI_temp(2));
-                Result.AvNorm_DensityAbove04_Ch1=mean(D1_above_04/max(D1));
+                Result.Av_DensityAbove04_Ch1 = mean(D1_above_04);
+                Result.Av_Rela_DensityAbove04_Ch1 = mean(D1_above_04 / DensityROI_temp(2));
+                Result.AvNorm_DensityAbove04_Ch1 = mean(D1_above_04 / max(D1));
                 
                 % Below Threshold
-                D1_below_04=Data_DoC1.D1_D2(Data_DoC1.Ch==1 & Data_DoC1.DoC<ColoThres);
+                D1_below_04 = Data_DoC1.D1_D2((Data_DoC1.Ch == 1) & (Data_DoC1.DoC < ColoThres));
                 
-                Result.Av_DensityBelow04_Ch1=mean(D1_below_04);
-                Result.Av_Rela_DensityBelow04_Ch1=mean(D1_below_04/DensityROI_temp(2));
-                Result.AvNorm_DensityBelow04_Ch1=mean(D1_below_04/max(D1));
+                Result.Av_DensityBelow04_Ch1 = mean(D1_below_04);
+                Result.Av_Rela_DensityBelow04_Ch1 = mean(D1_below_04 / DensityROI_temp(2));
+                Result.AvNorm_DensityBelow04_Ch1 = mean(D1_below_04 / max(D1));
                 
                 
                 
                 % Channel 2
-                D2=Data_DoC1.D1_D2(Data_DoC1.Ch==2);
-                Result.Av_Rela_Density_Ch2=mean(D2/DensityROI_temp(3));
-                Result.AvNorm_Density_Ch2=mean(D2_Norm);
+                D2 = Data_DoC1.D1_D2(Data_DoC1.Ch == 2);
+                Result.Av_Rela_Density_Ch2 = mean(D2 / DensityROI_temp(3));
+                Result.AvNorm_Density_Ch2 = mean(D2_Norm);
                 
                 % Above threshold
-                D2_above_04=Data_DoC1.D1_D2(Data_DoC1.Ch==2 & Data_DoC1.DoC>=ColoThres);
+                D2_above_04 = Data_DoC1.D1_D2((Data_DoC1.Ch == 2) & (Data_DoC1.DoC >= ColoThres));
                 
-                Result.Av_DensityAbove04_Ch2=mean(D2_above_04);
-                Result.Av_Rela_DensityAbove04_Ch2=mean(D2_above_04/DensityROI_temp(3));
-                Result.AvNorm_DensityAbove04_Ch2=mean(D2_above_04/max(D2));
+                Result.Av_DensityAbove04_Ch2 = mean(D2_above_04);
+                Result.Av_Rela_DensityAbove04_Ch2 = mean(D2_above_04 / DensityROI_temp(3));
+                Result.AvNorm_DensityAbove04_Ch2 = mean(D2_above_04 / max(D2));
                 
                 % Below Threshold
-                D2_below_04=Data_DoC1.D1_D2(Data_DoC1.Ch==2 & Data_DoC1.DoC<ColoThres);
+                D2_below_04 = Data_DoC1.D1_D2((Data_DoC1.Ch == 2) & (Data_DoC1.DoC < ColoThres));
                 
-                Result.Av_DensityBelow04_Ch2=mean(D2_below_04);
-                Result.Av_Rela_DensityBelow04_Ch2=mean(D2_below_04/DensityROI_temp(3));
-                Result.AvNorm_DensityBelow04_Ch2=mean(D2_below_04/max(D2));
+                Result.Av_DensityBelow04_Ch2 = mean(D2_below_04);
+                Result.Av_Rela_DensityBelow04_Ch2 = mean(D2_below_04 / DensityROI_temp(3));
+                Result.AvNorm_DensityBelow04_Ch2 = mean(D2_below_04 / max(D2));
                 
 
-                ResultTable{reg,cell}=Result;
+                ResultTable{reg,cell} = Result;
                 else
-                    ResultTable{reg,cell}=[];
+                    ResultTable{reg,cell} = [];
                 
                 end
             
@@ -344,9 +360,9 @@ ColoThres=0.4;
         
  %% Annexes Convert to Xcel
  
-A=ResultTable(:);
-A=A (~cellfun('isempty',A),1);
-ResultTable=A;
+A = ResultTable(:);
+A = A (~cellfun('isempty',A),1);
+ResultTable = A;
  
  %  small routine to extract and sort out the data
  %  Example to help build your own routines
@@ -354,8 +370,8 @@ ResultTable=A;
 
     
     % Percent Colocalisaton above threshold
-    Percent_Ch1_ColocAbove04=arrayfun(@(x) x{:}.Percent_Ch1_ColocAbove04,ResultTable);
-    Percent_Ch2_ColocAbove04=arrayfun(@(x) x{:}.Percent_Ch2_ColocAbove04,ResultTable);
+    Percent_Ch1_ColocAbove04 = arrayfun(@(x) x{:}.Percent_Ch1_ColocAbove04, ResultTable);
+    Percent_Ch2_ColocAbove04 = arrayfun(@(x) x{:}.Percent_Ch2_ColocAbove04, ResultTable);
     
     % Density above threshold
 %     AvNorm_DensityAbove04=arrayfun(@(x) x{:}.AvNorm_DensityAbove04,ResultTable);
@@ -369,12 +385,12 @@ ResultTable=A;
 %    PercentLrAbove05_Ch1=arrayfun(@(x) x{:}.PercentLrAbove05_Ch1,ResultTable)
 %    PercentLrAbove05_Ch2=arrayfun(@(x) x{:}.PercentLrAbove05_Ch2,ResultTable)
     
-    Array1=[{'Percentage of colocalized Ch1 molecules'}, ...
-        {'Percentage of colocalized Ch1 molecules'}]; %, ...
+    Array1 = [{'Percentage of colocalised Ch1 molecules'}, ...
+        {'Percentage of colocalised Ch2 molecules'}]; %, ...
 %         {'AvNormDensity>0.4'},	{'AvNormDensity<0.4'},...
 %         {'AvRelaDensity>0.4'}, {'AvRelaDensity<0.4'}, {'Correlation DC vs Density'}];
     
-    Matrix_Result1=[Percent_Ch1_ColocAbove04...
+    Matrix_Result1 = [Percent_Ch1_ColocAbove04...
                     Percent_Ch2_ColocAbove04]; %...
 %                     AvNorm_DensityAbove04...
 %                     AvNorm_DensityBelow04...
@@ -382,9 +398,9 @@ ResultTable=A;
 %                     AvRela_DensityBelow04...
 %                     Correlation_ColocVsDensity];% PercentLrAbove05_Ch1 PercentLrAbove05_Ch2];
      
-    RegionName1=strcat('DoC Results'); % name of the sheet
-    xlswrite('DoC Results',Array1,RegionName1,'A1'); %'Regiion' = name of the filename xcel shee, Array1 = data to put in the spreadsheet, 'A1' where to start
-    xlswrite('DoC Results',Matrix_Result1,RegionName1,'A2');
+    RegionName1 = strcat('DoC Results'); % name of the sheet
+    xlswrite(fullfile(Path_name, 'DoC Results'), Array1, RegionName1, 'A1'); %'Regiion' = name of the filename xcel shee, Array1 = data to put in the spreadsheet, 'A1' where to start
+    xlswrite(fullfile(Path_name, 'DoC Results'), Matrix_Result1, RegionName1, 'A2');
     
     %% Density ch1 ch2
     
@@ -429,9 +445,8 @@ ResultTable=A;
 %     xlswrite('Region',Matrix_Result2,RegionName2,'A2');   
 % 
 %         
-        save('ResultTable','ResultTable');
+        save(fullfile(Path_name, 'ResultTable'), 'ResultTable');
         toc      
-cd ..
 end    
     
     
