@@ -29,15 +29,11 @@ function DoCGUIInitialize(varargin)
     panel_border = 680/925-0.01;
     
     % Load in icons used here, convert to appropriate format
-    [SquareSelectIcon, ~] = imread('.\private\SquareROIIcon.jpg');
-    [PolySelectIcon, ~] = imread('.\private\PolyROIIcon.jpg');
+    currFileName = mfilename('fullpath');
+    currPath = fileparts(currFileName);   
+    [SquareSelectIcon, ~] = imread(strcat(currPath, '\private\SquareROIIcon.jpg'));
+    [PolySelectIcon, ~] = imread(strcat(currPath, '\private\PolyROIIcon.jpg'));
 
-%     SquareSelectIcon = ind2rgb(SquareSelectData, SquareSelectMap); % Convert from GIF
-%     PolySelectIcon = ind2rgb(PolySelectData, PolySelectMap);
-
-    
-    
-    
     handles.handles.b_panel = uipanel(fig1, 'Units', 'normalized', 'Position', [0 0.05, 1-panel_border, 0.90], ...
         'BackgroundColor', [1 1 1], 'BorderType', 'none', 'Tag', 'b_panel');
 
