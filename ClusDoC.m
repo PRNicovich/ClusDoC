@@ -725,6 +725,7 @@ function Load_Data(~,~,~)
         end
 
         % Load mask files
+        
         handles = loadMaskFiles(handles);
         
         guidata(handles.handles.MainFig, handles);
@@ -864,7 +865,7 @@ function [roiCoordinates, loadOK] = loadCoordinatesFile(fName, scaleFactor, hand
             
             thisCellsROIs = coordList(strcmp(IDstring, cellList));
 
-            disp(length(thisCellsROIs));
+%             disp(length(thisCellsROIs));
             
             for p = 1:length(thisCellsROIs)
 
@@ -934,8 +935,10 @@ function handles = loadMaskFiles(handles)
     
     end
     
-    handles.MaskFiles(isempty(handles.MaskFiles)) = [];
-    handles.MaskImg(isempty(handles.MaskImg)) = [];
+    if ~isempty(possibleFiles)
+        handles.MaskFiles(isempty(handles.MaskFiles)) = [];
+        handles.MaskImg(isempty(handles.MaskImg)) = [];
+    end
     
 	handles.MaskCellPair = zeros(size(handles.CellData, 1), 2);
     handles.MaskCellPair(:,1) = 1:size(handles.CellData, 1);
