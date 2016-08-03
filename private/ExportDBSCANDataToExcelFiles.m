@@ -1,4 +1,4 @@
-function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder)
+function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder, chan)
 
     % Formerly Final_Result_DBSCAN_GUIV2
     % Extracts and exports Results table into Excel format
@@ -24,8 +24,8 @@ function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder)
     Matrix_Result = [Percent_in_Cluster_column*100 , Number_column(:,1) , Area_column(:,1) , Density_column*1e6 ,...
         RelativeDensity_column, TotalNumber, Circularity_column, Number_Cluster_column, Number_Cluster_column./(1e-6*cellROIPair(:,5))];
 
-    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), cellROIPair, 'A', 'A2');
-    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), HeaderArray, 'A', 'A1');
-    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), Matrix_Result, 'A', 'G2');
+    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), cellROIPair, sprintf('Chan%d', chan), 'A2');
+    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), HeaderArray, sprintf('Chan%d', chan), 'A1');
+    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), Matrix_Result, sprintf('Chan%d', chan), 'G2');
 
 end

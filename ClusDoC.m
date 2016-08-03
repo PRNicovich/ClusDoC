@@ -2040,8 +2040,8 @@ function DBSCAN_All(~, ~, ~)
                 end % Cell
 
                 
+                ExportDBSCANDataToExcelFiles(cellROIPair, Result, strcat(handles.Outputfolder, '\DBSCAN Results'), chan);
                 
-                ExportDBSCANDataToExcelFiles(cellROIPair, Result, strcat(handles.Outputfolder, '\DBSCAN Results'));
 
                 save(fullfile(handles.Outputfolder, 'DBSCAN Results', sprintf('Ch%d', chan), ...
                                     'DBSCAN_Cluster_Result.mat'),'ClusterSmoothTable','Result','-v7.3');

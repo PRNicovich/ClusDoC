@@ -37,7 +37,10 @@ Result = struct('Correlation_Coloc1_vs_Density1', [], 'Correlation_Coloc2_vs_Den
         
         for cell = 1:size(CellData, 1)
                 
-            for reg = 1:size(ROICoordinates{cell}, 1)
+            for reg = 1:length(ROICoordinates{cell})
+                
+                disp(cell)
+                disp(reg)
 
                 % Since which ROI a point falls in is encoded in binary, decode here
                 whichPointsInROI = fliplr(dec2bin(CellData{cell}(:, NDatacolumns + 1)));

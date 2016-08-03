@@ -116,7 +116,7 @@ clusterIDOut = cell(max(cellfun(@length, ROICoordinates)), length(CellData), 2);
 %         assignin('base', 'p', cellIter);
 %         assignin('base', 'q', roiIter);
         
-        ExportDBSCANDataToExcelFiles(cellROIPair, ResultCell, strcat(Path_name, '\DBSCAN Results'));
+        ExportDBSCANDataToExcelFiles(cellROIPair, ResultCell, strcat(Path_name, '\DBSCAN Results'), Ch);
 
     end % channel
 

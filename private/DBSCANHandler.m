@@ -15,8 +15,8 @@ try
         if nargin == 2
             % Test mode
             % Fun_DBSCAN_Test
-            p = []; % Labeling only
-            q = []; % Labeling only
+            cellNum = []; % Labeling only
+            ROINum = []; % Labeling only
             display1 = false;
             display2 = false;
             printOutFig = false;
@@ -24,8 +24,8 @@ try
         elseif nargin > 2
             % FullCalc mode
             % Follow FunDBSCAN_GUIV2
-            p = varargin{1}; % Labeling only
-            q = varargin{2}; % Labeling only
+            cellNum = varargin{1}; % Labeling only, Cell number
+            ROINum = varargin{2}; % Labeling only, ROI number
             display1 = varargin{3};
             display2 = varargin{4};
             printOutFig = true;
@@ -225,7 +225,7 @@ try
              ClusterSmooth = ClusterSmooth(~cellfun('isempty', ClusterSmooth));
 
              % Plot DBSCAN results
-             Name = strcat('Cell', num2str(p), '_Region', num2str(q), 'Region_with_Cluster.tif');
+             Name = strcat('Cell', num2str(cellNum), '_Region', num2str(ROINum), 'Region_with_Cluster.tif');
              set(ax1, 'box', 'on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
              set(fig1, 'Color', [1 1 1], 'Tag', 'ClusDoC')
              if printOutFig
@@ -266,7 +266,7 @@ try
                 'XLim', [min(Data(:,1)), max(Data(:,1))], 'YLim', [min(Data(:,2)), max(Data(:,2))]);
             set(fig2, 'Color', [1 1 1], 'Tag', 'ClusDoC')
 
-            Name = strcat('Cell',num2str(p),'_Region',num2str(q), '_Density_map.tif');
+            Name = strcat('Cell',num2str(cellNum),'_Region',num2str(ROINum), '_Density_map.tif');
             print(fullfile(DBSCANParams.Outputfolder, 'DBSCAN Results', ...
                 sprintf('Ch%d', DBSCANParams.CurrentChannel), 'Cluster density maps', Name), fig2, '-dtiff');
             close(fig2);
@@ -293,7 +293,7 @@ try
                 'XLim', [min(Data(:,1)), max(Data(:,1))], 'YLim', [min(Data(:,2)), max(Data(:,2))]);
             set(fig3, 'Color', [1 1 1], 'Tag', 'ClusDoC');
 
-            Name = strcat('Cell',num2str(p),'_Region',num2str(q), '_Norm_Density_map.tif');
+            Name = strcat('Cell',num2str(cellNum),'_Region',num2str(ROINum), '_Norm_Density_map.tif');
             print(fullfile(DBSCANParams.Outputfolder, 'DBSCAN Results', ...
                 sprintf('Ch%d', DBSCANParams.CurrentChannel), 'Cluster density maps', Name), fig3, '-dtiff');
             close(fig3);
