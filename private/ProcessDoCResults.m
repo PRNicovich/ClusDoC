@@ -283,8 +283,9 @@ Result = struct('Correlation_Coloc1_vs_Density1', [], 'Correlation_Coloc2_vs_Den
 %                 whos Data_DoC1
 %                 whos ColoThres
                                 
-                Result.Percent_Ch1_ColocAbove04 = sum((Data_DoC1(:,NDatacolumns+4) >= ColoThres) & (Data_DoC1(:,12) == 1)) / sum((Data_DoC1(:,12))); % 
-                Result.Percent_Ch2_ColocAbove04 = sum((Data_DoC1(:,NDatacolumns+4) >= ColoThres) & (Data_DoC1(:,12) == 2)) / sum((Data_DoC1(:,12))); % ;  %
+                Result.Percent_Ch1_ColocAbove04 = sum((Data_DoC1(:,NDatacolumns+4) >= ColoThres) & (Data_DoC1(:,12) == 1)) / sum((Data_DoC1(:,12) == 1)); % 
+                Result.Percent_Ch2_ColocAbove04 = sum((Data_DoC1(:,NDatacolumns+4) >= ColoThres) & (Data_DoC1(:,12) == 2)) / sum((Data_DoC1(:,12) == 2)); % ;  %
+
                 
 %                 disp('line283');
                 
