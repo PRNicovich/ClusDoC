@@ -1,4 +1,6 @@
 % ExportDoCDataToTxtFile
+
+% Export data point-wise
 % Header columns are:
 % Index	FirstFrame	NumFrames	FramesMissing	PostX[nm]	PostY[nm]
 % Precision[nm]	NPhotons	BackVar	Chi^2	PSFwidth[nm]	Channel	ZSlice
@@ -14,7 +16,7 @@ handles = guidata(findobj('tag', 'PALM GUI'));
 
 for fN = 1:length(handles.CellData)
 
-    fileName = strcat(handles.ImportFiles{fN}(1:(end-4)), '_Export.txt');
+    fileName = strcat(handles.ImportFiles{fN}(1:(end-4)), '_ExportByPoint.txt');
     fprintf(1, 'Writing to file %s\n', fileName);
 
     fID = fopen(fileName, 'w+');

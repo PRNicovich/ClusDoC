@@ -1,5 +1,7 @@
 function [datathr, ClusterSmooth, SumofContour, classOut, varargout] = DBSCANHandler(Data, DBSCANParams, varargin)
 
+% vargout = {fig1Handle, fig2Handle, fig3Handle, Results}
+
 try 
 
     %   Data = Zen format
@@ -12,7 +14,7 @@ try
         
         classOut = zeros(size(Data, 1), 1);
 
-        if nargin == 2
+        if nargin == 3
             % Test mode
             % Fun_DBSCAN_Test
             cellNum = []; % Labeling only
@@ -21,7 +23,8 @@ try
             display2 = false;
             printOutFig = false;
             clusterColor = rgb(46, 204, 113);
-        elseif nargin > 2
+            maskVector = varargin{1};
+        elseif nargin > 3
             % FullCalc mode
             % Follow FunDBSCAN_GUIV2
             cellNum = varargin{1}; % Labeling only, Cell number
@@ -30,10 +33,11 @@ try
             display2 = varargin{4};
             printOutFig = true;
             clusterColor = varargin{5};
+            maskVector = varargin{6};
             
-            if nargin == 9
-                Density = varargin{6}; % Data is an input
-                DoCScore = varargin{7};
+            if nargin == 10
+                Density = varargin{7}; % Data is an input
+                DoCScore = varargin{8};
             end
 
         end
@@ -94,6 +98,11 @@ try
             dataThreshVector = true(size(Data, 1), 1);
             datathr = Data(dataThreshVector, 1:2);
         end
+        
+        if nargout == 9;
+            disp('export dataThreshVector');
+            varargout{5} = dataThreshVector;
+        end
 
         % Data4dbscan = datathr(:,1:2);
         % DBSCAN_Radius = r2;%20;
@@ -124,6 +133,7 @@ try
             
             [ClusImage,  Area, Circularity, Nb, contour, edges, Cutoff_point] = Smoothing_fun4cluster(xin(:,1:2), DBSCANParams, false, false); % 0.1*max intensity 
 
+            ClusterSmooth{i,1}.ClusterID = i;
             ClusterSmooth{i,1}.Points = xin(:,1:2);
             ClusterSmooth{i,1}.Image = ClusImage;
             ClusterSmooth{i,1}.Area = Area;%
@@ -134,7 +144,9 @@ try
             ClusterSmooth{i,1}.Circularity = Circularity;%
             ClusterSmooth{i,1}.TotalAreaDensity = AvDensity;%
             ClusterSmooth{i,1}.Density_Nb_A = Nb/Area;%
-            ClusterSmooth{i, 1}.RelativeDensity_Nb_A=Nb/Area/AvDensity;%
+            ClusterSmooth{i,1}.RelativeDensity_Nb_A=Nb/Area/AvDensity;%
+            ClusterSmooth{i,1}.NInsideMask = sum(maskVector(class == i));
+            ClusterSmooth{i,1}.NOutsideMask = sum(~maskVector(class == i));
 
             ClusterSmooth{i,1}.Density20 = Density20;%
             
@@ -152,9 +164,10 @@ try
                  
             end
             
-            if nargin == 9 % DoC analysis.  DoC score is an input.
+            if nargin == 10 % DoC analysis.  Vector of DoC scores for each point is an input.
               
                 ClusterSmooth{i,1}.Density = Density(class == i);%
+                ClusterSmooth{i,1}.MeanDoC = mean(DoCScore(class == i));
                 
                 Point_In = xin(DoCScore(class == i) >= DBSCANParams.DoCThreshold, 1:2);
                 Nb_In = size(Point_In,1);
