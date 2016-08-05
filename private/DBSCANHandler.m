@@ -35,9 +35,12 @@ try
             clusterColor = varargin{5};
             maskVector = varargin{6};
             
+            printOutFigDest = 'DBSCAN Results';
+            
             if nargin == 10
                 Density = varargin{7}; % Data is an input
                 DoCScore = varargin{8};
+                printOutFigDest = 'Clus-DoC Results\DBSCAN Results';
             end
 
         end
@@ -242,7 +245,7 @@ try
              set(ax1, 'box', 'on','XTickLabel',[],'XTick',[],'YTickLabel',[],'YTick',[])
              set(fig1, 'Color', [1 1 1], 'Tag', 'ClusDoC')
              if printOutFig
-                print(fullfile(DBSCANParams.Outputfolder, 'Clus-DoC Results\DBSCAN Results', sprintf('Ch%d', DBSCANParams.CurrentChannel), 'Cluster maps', Name), fig1, '-dtiff');
+                print(fullfile(DBSCANParams.Outputfolder, printOutFigDest, sprintf('Ch%d', DBSCANParams.CurrentChannel), 'Cluster maps', Name), fig1, '-dtiff');
                 close(fig1);
              end
 
