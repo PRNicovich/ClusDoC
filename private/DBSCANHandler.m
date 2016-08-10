@@ -68,7 +68,12 @@ try
         xsize = ceil (max(Data(:,1)) - min(Data(:,1)));
         ysize = ceil (max(Data(:,2)) - min(Data(:,2)));
         SizeROI = max([xsize, ysize]);
-        AvDensity = size(Data, 1)/(xsize*ysize);
+        try
+            AvDensity = size(Data, 1)/(xsize*ysize);
+        catch mError
+            assignin('base', 'Data', Data);
+            rethrow(mError);
+        end
         Nrandom = AvDensity*pi*DBSCANParams.Lr_rThreshRad^2;
 
         % if Nrandom<3

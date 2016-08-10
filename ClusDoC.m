@@ -441,7 +441,9 @@ function FunPlot(whichCell)
     end
     
     % Reset list of ROIs to match current cell
-    set(handles.handles.popupROI2, 'String', handles.ROIPopupList{whichCell});
+    if isfield(handles.handles, 'popupROI2')
+        set(handles.handles.popupROI2, 'String', handles.ROIPopupList{whichCell});
+    end
     set(handles.handles.ax_h, 'xtick', [], 'ytick', [], 'Position', [0.005 .01 .99 .955])
     set(handles.handles.ax_h, 'xlim', [0 handles.MaxSize], 'ylim', [0 handles.MaxSize]);
     axis image % Freezes axis aspect ratio to that of the initial image -
@@ -479,7 +481,7 @@ function plotAllROIs(whichCell)
     set(handles.handles.ax_h, 'NextPlot', 'replace');
     
     
-    if (handles.CurrentROIData > length(handles.ROIPopupList{whichCell})) && ~isempty(handles.ROIPopupList{whichCell})
+    if (handles.CurrentROIData > length(handles.ROIPopupList{whichCell})) & (~isempty(handles.ROIPopupList{whichCell}))
         handles.CurrentROIData = length(handles.ROIPopupList{whichCell});
         set(handles.handles.popupROI2, 'Value', handles.CurrentROIData);
     elseif isempty(handles.ROIPopupList{whichCell})
@@ -658,13 +660,16 @@ function Load_Data(~,~,~)
 
                 importData = Import1File(fullfile(pathName, fileName{k}));
                 handles.CellData{k} = [importData.Data zeros(size(importData.Data, 1), 8)];
+%                 handles.CellData{k}(:,5:6) = handles.CellData{k}(:,5:6)*importData.Footer{2}(3)/importData.Footer{2}(1);
+                handles.CellData{k}(any(isnan(handles.CellData{k}), 2), :) = []; % protection against incomplete line writing in ZEN export
+                
                 handles.NDataColumns = size(importData.Data, 2);
                 handles.CellData{k}(:,handles.NDataColumns + 2) = 1; % All data is in mask until set otherwise
                 handles.ROIMultiplier = importData.Footer{2}(3); % Conversion from coordinates.txt positions to nm
                 handles.MaxSize = importData.Footer{2}(5)/importData.Footer{2}(3); % FOV size, in nm
                 handles.ImportFiles{k} = fullfile(pathName, fileName{k});
                 
-                handles.Nchannels = numel(unique(importData.Data(:,12)));
+                handles.Nchannels = numel(unique(handles.CellData{k}(:,12)));
 
                 
             else
@@ -711,6 +716,7 @@ function Load_Data(~,~,~)
                     handles.ROIPopupList{c} = strsplit(num2str(1:length(handles.ROICoordinates{c})), ' ');
                 end
                 set(handles.handles.popupROI2, 'String', handles.ROIPopupList{handles.CurrentCellData}); 
+                
             end
             
             
@@ -720,6 +726,13 @@ function Load_Data(~,~,~)
             
             handles.CellData = assignROIsToCellData(handles.CellData, handles.ROICoordinates, handles.NDataColumns);
             set(handles.handles.CoordinatesText, 'String', fullfile(pathName, 'coordinates.txt'));
+            
+        else
+            
+            handles.ROIPopupList = {'ROI'};
+            for c = 1:length(handles.CellData)
+                handles.ROICoordinates{c} = {};
+            end
   
         end
            

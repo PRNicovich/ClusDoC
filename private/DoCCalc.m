@@ -39,6 +39,11 @@ function [dataOut, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
     y2 = dataOut((dataOut(:,4) == 2) & (dataOut(:,8) == 1), 2);
 
 
+    assignin('base', 'x1', x1);
+    assignin('base', 'y1', y1);
+    assignin('base', 'x2', x2);
+    assignin('base', 'y2', y2);
+    
     %[idx1,Dis]=rangesearch([x1 y1],[x1 y1],Rmax);
     %D1max=(cellfun(@length,idx1)-1)/(Rmax^2);
     D1max = sum((dataOut(:,4) == 1) & (dataOut(:,8) == 1))/SizeROI^2;
@@ -59,19 +64,28 @@ function [dataOut, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
     
     fprintf(1, 'Calculating DoC scores...\n');
     % DoC calculation for Chan1 -> Chan1, Chan1 -> Chan2
+
     parfor i = 1:ceil(Rmax/Step)
 
         r = Step*i;                           
 
+%         [idx, ~] = rangesearch([x1 y1], [x1 y1], r);
+%         num_points = cellfun(@length, idx) - 1;
         num_points = kdtree2rnearest(x1, y1, x1, y1, r)-1; % Ch1 -> Ch1
         N11(:, i) = num_points ./ (D1max*r^2);
-
+% 
+%         [idx, ~] = rangesearch([x2 y2], [x1 y1], r);
+%         num_points = cellfun(@length, idx) - 1;
         num_points = kdtree2rnearest(x2, y2, x1, y1, r); % Ch1 -> Ch2
         N12(:, i) = num_points ./ (D2maxCh1Ch2*r^2);
 
+%         [idx, ~] = rangesearch([x2 y2], [x2 y2], r);
+%         num_points = cellfun(@length, idx) - 1;
         num_points = kdtree2rnearest(x2, y2, x2, y2, r)-1; % Ch2 -> Ch2
         N22(:, i) = num_points ./ (D1max*r^2);
 
+%         [idx, ~] = rangesearch([x1 y1], [x2 y2], r);
+%         num_points = cellfun(@length, idx) - 1;
         num_points = kdtree2rnearest(x1, y1, x2, y2, r); % Ch2 -> Ch1
         N21(:, i) = num_points' ./ (D2maxCh2Ch1*r^2);
 
