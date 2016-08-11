@@ -207,13 +207,25 @@ function DoCGUIInitialize(varargin)
     handles.handles.popupMask = uicontrol(handles.handles.b_panel, 'Units', 'normalized', 'Style', 'popup', 'String', {''},...
         'Position', [xbutton2-0.1 ybutton2-2*h2 1.35*w2 h2], 'Callback', @popupMask_Callback, 'Tag', 'SelectMask');
     
+    % Align mask to cell data button
+    h2=butt_height/2;
+    w2=butt_width*2/5-space1/2;
+    ybutton=ybutton-(space1+h1);
+
+    xbutton=3*w1+2*space1;
+    ybutton2=ybutton2-2.8*h2;
+    %       ybutton=ybutton;
+
+    handles.handles.alignMaskButton = uicontrol(handles.handles.b_panel, 'Units', 'normalized','Style','pushbutton','String','Align Mask',...
+        'Position',[xbutton ybutton2 w2 h2],'Callback', @alignMask, 'Tag', 'AlignMask','enable','off');
+    
 
     % Button RipleyK test for Active ROI
     h1=butt_height/2;
     w1=butt_width/2-space1/2;
 
     xbutton=space1;
-    ybutton=ybutton-(space1+3*h1);
+    ybutton=ybutton-(space1+4*h1);
 
     handles.handles.hRipleyActiveROI = uicontrol(handles.handles.b_panel, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'RipleyK Test',...
         'Position', [xbutton ybutton w1 h1], 'Callback', @RipleyKtest, 'Tag', 'RipleyK_test','enable','off');
@@ -662,12 +674,16 @@ function Load_Data(~,~,~)
                 handles.CellData{k} = [importData.Data zeros(size(importData.Data, 1), 8)];
 %                 handles.CellData{k}(:,5:6) = handles.CellData{k}(:,5:6)*importData.Footer{2}(3)/importData.Footer{2}(1);
                 handles.CellData{k}(any(isnan(handles.CellData{k}), 2), :) = []; % protection against incomplete line writing in ZEN export
-                
+                   
                 handles.NDataColumns = size(importData.Data, 2);
                 handles.CellData{k}(:,handles.NDataColumns + 2) = 1; % All data is in mask until set otherwise
-                handles.ROIMultiplier = importData.Footer{2}(3); % Conversion from coordinates.txt positions to nm
-                handles.MaxSize = importData.Footer{2}(5)/importData.Footer{2}(3); % FOV size, in nm
+                handles.ROIMultiplier = importData.Footer{2}(1); % Conversion from coordinates.txt positions to nm
+                handles.MaxSize = importData.Footer{2}(5)*10*importData.Footer{2}(1)/importData.Footer{2}(3); % FOV size, in nm
                 handles.ImportFiles{k} = fullfile(pathName, fileName{k});
+                
+                % Clear out any points outside of bounds [0 MaxSize];
+                handles.CellData{k}(any(handles.CellData{k}(:, 5:6) > handles.MaxSize), : )= [];
+                handles.CellData{k}(any(handles.CellData{k}(:, 5:6) < 0), : )= [];
                 
                 handles.Nchannels = numel(unique(handles.CellData{k}(:,12)));
 
@@ -997,6 +1013,23 @@ function popupMask_Callback(varargin)
 
 end
 
+function alignMask(varargin)
+
+    handles = guidata(findobj('tag', 'PALM GUI'));
+    
+    pointMask = double(hist2(handles.CellData{handles.CurrentCellData}(:,5)/handles.MaskPixelSize, handles.CellData{handles.CurrentCellData}(:,6)/handles.MaskPixelSize, ...
+        0:1:round(handles.MaxSize/handles.MaskPixelSize - 1), 0:1:round(handles.MaxSize/handles.MaskPixelSize - 1)) > 0)';
+
+    maskImg = double(handles.MaskImg{handles.MaskCellPair(handles.CurrentCellData, 2)});
+    [optimizer, metric] = imregconfig('monomodal');
+    tform = imregister(maskImg, pointMask, 'translation', optimizer, metric);
+    handles.MaskImg{handles.MaskCellPair(handles.CurrentCellData, 2)} = tform > 0.5;
+
+    guidata(handles.handles.MainFig, handles);
+    displayMaskImg(handles);
+    applyMaskImgToDataTable(handles);
+end
+
 function displayMaskImg(handles)
 
     % Given a selected mask image, scale and apply it to the current image
@@ -1031,7 +1064,7 @@ function displayMaskImg(handles)
             if ishandle(handles.handles.MaskHandle)
              delete(handles.handles.MaskHandle);
              handles.MaskCellPair(handles.CurrentCellData, 2) = 0;
-             handles.CellData{k}(:,handles.NDataColumns + 2) = 1; % All data is in mask until set otherwise
+             handles.CellData{handles.CurrentCellData}(:,handles.NDataColumns + 2) = 1; % All data is in mask until set otherwise
              guidata(handles.handles.MainFig, handles);
             end
         end
