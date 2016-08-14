@@ -293,7 +293,7 @@ function DoCGUIInitialize(varargin)
     w1=butt_width;
 
     xbutton=space1;
-    ybutton=ybutton-(space1+3*h1);
+    ybutton=ybutton-(space1+2*h1);
     handles.handles.hreset = uicontrol(handles.handles.b_panel, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'Reset',...
         'Position', [xbutton ybutton w1 h1], 'Callback', @Reset, 'Tag', 'Reset','enable','on');
 
@@ -597,7 +597,7 @@ function DeleteROI(varargin)
     handles.handles.ROIOutlines(handles.CurrentROIData) = [];
     
     
-    if (handles.CurrentROIData == 1) && (~isempty(handles.ROICoordinates{handles.CurrentCellData}))
+    if (handles.CurrentROIData == 1) & (~isempty(handles.ROICoordinates{handles.CurrentCellData}))
         % Delete first entry
         handles.ROIPopupList{handles.CurrentCellData}(handles.CurrentROIData) = [];
         set(handles.handles.popupROI2, 'string', handles.ROIPopupList{handles.CurrentCellData});
@@ -745,9 +745,11 @@ function Load_Data(~,~,~)
             
         else
             
-            handles.ROIPopupList = {'ROI'};
+%             handles.ROIPopupList = {'ROI'};
             for c = 1:length(handles.CellData)
                 handles.ROICoordinates{c} = {};
+                handles.ROIPopupList{c} = {'ROI'};
+                handles.CoordFile = '';
             end
   
         end
@@ -789,7 +791,7 @@ function Load_Data(~,~,~)
         firstEntry = firstLine(1:5);
         fclose(fID);
 
-        if ismember(nTabs, [12, 13, 14]) && strcmp(firstEntry, 'Index')
+        if ismember(nTabs, [11, 12, 13, 14]) && strcmp(firstEntry, 'Index')
             isGood = true;
         else
             isGood = false;
@@ -812,15 +814,19 @@ function [roiCoordinates, loadOK] = loadCoordinatesFile(fName, scaleFactor, hand
     % squares
 
     fID = fopen(fName, 'r');
-    isHeader = true;
     lineNow = 0;
     isEnd = false;
-    while isHeader && ~isEnd
+    isData = false;
+    while ~isEnd | ~isData
         lineString = fgetl(fID);
         if lineString(1) ~= '#'
-            isHeader = false;
+            testLine = lineString;
+%             disp('end of header');
+            isData = true;
+            break;
         elseif isempty(lineString)
             isEnd = true;
+%             disp('end of file');
         else
             lineNow = lineNow + 1;
             % Check if ROI size specified
@@ -836,7 +842,6 @@ function [roiCoordinates, loadOK] = loadCoordinatesFile(fName, scaleFactor, hand
     % Any more than 4 columns and format has to be polygons in
     % x1\ty1\tx2\ty2\tx3\ty3... format
 
-    testLine = fgetl(fID);
     nTabs = numel(strfind(testLine, sprintf('\t')));
     fseek(fID, 0, -1);
     for skipLines = 1:lineNow
@@ -1130,6 +1135,7 @@ function CreateSquareROI(~, ~, ~)
     
     position = wait(rectHand);
     setFinalPosition(position);
+    set(handles.handles.DeleteROI, 'enable', 'on');
 %     disp('positionSet');
     
     function SquareROICallback(varargin)
@@ -1147,7 +1153,12 @@ function CreateSquareROI(~, ~, ~)
                                                                             post(1), post(2) + post(4);
                                                                             post(1), post(2)]);
         
-        lastNumEntry = str2double(handles.ROIPopupList{handles.CurrentCellData}(end));
+        if newROInum == 1
+            lastNumEntry = 0;
+        else
+            lastNumEntry = str2double(handles.ROIPopupList{handles.CurrentCellData}(end));
+        end
+        
         handles.ROIPopupList{handles.CurrentCellData}{newROInum} = num2str(lastNumEntry + 1);
         
         handles.CurrentROIData = newROInum;
@@ -2374,8 +2385,10 @@ function ExportToTextPush(varargin)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % ClusterwiseData
         % Print to txt file
-        fprintf(1, 'Writing to file %s\n', fullfile(handles.Outputfolder, 'ClusterExport.txt'));
-        fID = fopen(fullfile(handles.Outputfolder, 'ClusterExport.txt'), 'w+');
+        
+        fileName = strcat(handles.ImportFiles{fN}(1:(end-4)), '_ClusterExport.txt');
+        fprintf(1, 'Writing to file %s\n', fileName);
+        fID = fopen(fileName, 'w+');
         fprintf(fID, 'CellNum\tROINum\tChannel\tClusterID\tNPoints\tNb\tMeanDoCScore\tArea\tCircularity\tTotalAreaDensity\tAvRelativeDensity\tMeanDensity\tNb_In\tNInMask\tNOutMask\r\n');
 
         fmtStr = strcat(repmat('%d\t', 1, 6), repmat('%.4f\t', 1, 6), '%d\t%d\t%d\r\n');
@@ -2389,14 +2402,14 @@ function ExportToTextPush(varargin)
         fprintf(fID, '\r\n');
         %
         % Footer contains info on data processing parameters
-        for k = 1:length(handles.ImportFiles{fN})
+        for k = 1:length(handles.ImportFiles)
             fprintf(fID, '# SourceFiles: %d. %s\r\n', k, handles.ImportFiles{fN});
         end
         fprintf(fID, '# CoordinatesFile: %s\r\n', handles.CoordFile);
         fprintf(fID, '# NROIs: %d\r\n', length(handles.ROICoordinates{fN}));
 
         if  handles.MaskCellPair(fN, 2) > 0
-            fprintf(fID, '# MaskFile: %d\r\n', fullfile(handles.Path_name, handles.MaskFiles{handles.MaskCellPair(fN, 2)}));
+            fprintf(fID, '# MaskFile: %s\r\n', fullfile(handles.Path_name, handles.MaskFiles{handles.MaskCellPair(fN, 2) + 1}));
         else
             fprintf(fID, '# MaskFile: %s\r\n', 'NoMask');
         end
