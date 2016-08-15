@@ -277,7 +277,7 @@ function DoCGUIInitialize(varargin)
     xbutton=space1;
     ybutton=ybutton-(space1+2*h1);
     handles.handles.ResultsExplorerButton = uicontrol(handles.handles.b_panel, 'Units', 'normalized', 'Style', 'pushbutton', 'String', 'Results Explorer',...
-        'Position', [xbutton ybutton w1 h1], 'Callback', @ResultsExplorerPush, 'Tag', 'ResultsExplorer', 'enable', 'off');
+        'Position', [xbutton ybutton w1 h1], 'Callback', @ResultsExplorerPush, 'Tag', 'ResultsExplorer', 'enable', 'off', 'visible', 'off');
     
     % Button ExporttoText
     h1=butt_height/2;
@@ -767,6 +767,9 @@ function Load_Data(~,~,~)
             set(handles.handles.OutputText, 'String', fullfile(handles.Path_name, 'Extracted_Region'));
             handles.Outputfolder = fullfile(handles.Path_name, 'Extracted_Region');
             set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
         else
             set(handles.handles.OutputText, 'String', 'Set Output Folder Before Proceeding');
         end
@@ -1110,6 +1113,9 @@ function OutputEdit(varargin)
 
         set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
         set(handles.handles.ExportResultsButton, 'enable', 'off');
+        if handles.Nchannels == 1
+            set(handles.handles.hDoC_All1, 'enable', 'off');
+        end
 
         guidata(handles.handles.MainFig, handles);
 
@@ -1406,7 +1412,7 @@ function returnValue = setDBSCANParameters(handles)
         handles.handles.DBSCANChannelToggle.Visible = 'on';
     else
         handles.handles.DBSCANChannelToggle.Visible = 'on';
-        handles.handles.DBSCANChannelToggle.Enable = 'off';
+        handles.handles.DBSCANChannelSelect(2).Enable = 'off';
     end
         
     
@@ -1661,7 +1667,7 @@ function returnValue = setDoCParameters(handles)
         handles.handles.DBSCANChannelToggle.Visible = 'on';
     else
         handles.handles.DBSCANChannelToggle.Visible = 'on';
-        handles.handles.DBSCANChannelToggle.Enable = 'off';
+        handles.handles.DBSCANChannelSelect(2).Enable = 'off';
     end
         
     %%%%%%%%
@@ -2047,6 +2053,9 @@ function DBSCAN_Test(~, ~, ~)
 
             set(handles.handles.MainFig, 'pointer', 'arrow');
             set(findobj('parent', handles.handles.b_panel), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
             drawnow;
             fprintf(1, 'DBSCAN test completed.\n');
             
@@ -2054,6 +2063,9 @@ function DBSCAN_Test(~, ~, ~)
            
             set(handles.handles.MainFig, 'pointer', 'arrow');
             set(findobj('parent', handles.handles.b_panel), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
             drawnow;
             
             display('DBSCAN text exited with errors');
@@ -2088,6 +2100,9 @@ function RipleyK_All(~, ~, ~)
         
         set(handles.handles.MainFig, 'pointer', 'arrow');
         set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+        if handles.Nchannels == 1
+            set(handles.handles.hDoC_All1, 'enable', 'off');
+        end
         drawnow;
         return
         
@@ -2118,6 +2133,9 @@ function RipleyK_All(~, ~, ~)
            
             set(handles.handles.MainFig, 'pointer', 'arrow');
             set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
             drawnow;
             
             display('Ripley K processing exited with errors');
@@ -2130,6 +2148,9 @@ function RipleyK_All(~, ~, ~)
 
     set(handles.handles.MainFig, 'pointer', 'arrow');
     set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+    if handles.Nchannels == 1
+        set(handles.handles.hDoC_All1, 'enable', 'off');
+    end
     drawnow;
     
     guidata(handles.handles.MainFig, handles);
@@ -2163,6 +2184,9 @@ function DBSCAN_All(~, ~, ~)
         % Cancel.  Reset GUI
         set(handles.handles.MainFig, 'pointer', 'arrow');
         set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+        if handles.Nchannels == 1
+            set(handles.handles.hDoC_All1, 'enable', 'off');
+        end
         drawnow;
         return;
 
@@ -2276,6 +2300,9 @@ function DBSCAN_All(~, ~, ~)
             
             set(handles.handles.MainFig, 'pointer', 'arrow');
             set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
             drawnow;
             
             display('DBSCAN processing exited with errors.');
@@ -2288,6 +2315,9 @@ function DBSCAN_All(~, ~, ~)
 
     set(handles.handles.MainFig, 'pointer', 'arrow');
     set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+	if handles.Nchannels == 1
+        set(handles.handles.hDoC_All1, 'enable', 'off');
+	end
     drawnow;
     
     guidata(handles.handles.MainFig, handles);
@@ -2329,6 +2359,9 @@ function DoC_All(~, ~, ~)
         
         set(handles.handles.MainFig, 'pointer', 'arrow');
         set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+        if handles.Nchannels == 1
+            set(handles.handles.hDoC_All1, 'enable', 'off');
+        end
         drawnow;
         return;
         
@@ -2400,6 +2433,9 @@ function DoC_All(~, ~, ~)
             
             set(handles.handles.MainFig, 'pointer', 'arrow');
             set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
             drawnow;
             
 %             assignin('base', 'ClusterTableCh1', ClusterTableCh1);
@@ -2414,6 +2450,9 @@ function DoC_All(~, ~, ~)
 
     set(handles.handles.MainFig, 'pointer', 'arrow');
     set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+	if handles.Nchannels == 1
+        set(handles.handles.hDoC_All1, 'enable', 'off');
+    end
     drawnow;
     
     guidata(handles.handles.MainFig, handles);
@@ -2568,6 +2607,9 @@ function ExportToTextPush(varargin)
         
     catch mError
         set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+        if handles.Nchannels == 1
+            set(handles.handles.hDoC_All1, 'enable', 'off');
+        end
         set(handles.handles.MainFig, 'pointer', 'arrow');
         rethrow(mError)
     end
