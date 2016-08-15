@@ -54,20 +54,33 @@ end
 
 if ~isempty(floc)
 
-    fseek(fid, (ftloc-floc), -1); % Footer starts at start of line where string match was found.
-
     format_spec = '%s%f%s';
-    % On some machines the 'headerLines' value has to be 0 to work.  Not sure
-    % why this is the case.
-    Footer_text = textscan(fid, format_spec, 'headerLines', 1, 'delimiter', ':');
+    % Try-catch block to solve file import error on some (old?) files
+    try
+        Footer_text = textscan(fid, format_spec, 'headerLines', 1, 'delimiter', ':');
+        fseek(fid, (ftloc-floc), -1); % Footer starts at start of line where string match was found.
+
+        VoxelSizeX = Footer_text{2}(1);
+        VoxelSizeY = Footer_text{2}(2);
+        ResolutionX = Footer_text{2}(3);
+        ResolutionY = Footer_text{2}(4);
+        SizeX = Footer_text{2}(5);
+        SizeY = Footer_text{2}(6);
     
-    VoxelSizeX = Footer_text{2}(1);
-    VoxelSizeY = Footer_text{2}(2);
-    ResolutionX = Footer_text{2}(3);
-    ResolutionY = Footer_text{2}(4);
-    SizeX = Footer_text{2}(5);
-    SizeY = Footer_text{2}(6);
-    
+    catch
+        % On some machines the 'headerLines' value has to be 0 to work.  Not sure
+        % why this is the case.
+        fseek(fid, (ftloc), -1);
+        Footer_text = textscan(fid, format_spec, 'headerLines', 0, 'delimiter', ':');
+        Footer_text{1}(end) = [];
+        
+        VoxelSizeX = Footer_text{2}(1);
+        VoxelSizeY = Footer_text{2}(2);
+        ResolutionX = Footer_text{2}(3);
+        ResolutionY = Footer_text{2}(4);
+        SizeX = Footer_text{2}(5);
+        SizeY = Footer_text{2}(6);
+    end
 else
     Footer_text = '';
 end
