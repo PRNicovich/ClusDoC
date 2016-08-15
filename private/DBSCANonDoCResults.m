@@ -1,4 +1,4 @@
-function [ClusterSmoothTableCh1, ClusterSmoothTableCh2, clusterIDOut, clusterTable] = DBSCANonDoCResults(CellData, ROICoordinates, Path_name, Chan1Color, Chan2Color, dbscanParams, NDatacolumns, clusterTable)
+function [ClusterSmoothTableCh1, ClusterSmoothTableCh2, clusterIDOut, clusterTable] = DBSCANonDoCResults(CellData, ROICoordinates, Path_name, Chan1Color, Chan2Color, dbscanParamsPassed, NDatacolumns, clusterTable)
 % Routine to apply DBSCAN on the Degree of Colocalisation Result for
 
 
@@ -55,6 +55,7 @@ clusterTable = [];
 
                     %[ClusterSmooth2, fig,fig2,fig3] = FunDBSCAN4ZEN_V3( Data_DoC1,p,q,r,Display1,Display2);
 
+                    dbscanParams = dbscanParamsPassed(Ch);
                     dbscanParams.CurrentChannel = Ch;
 
                     if Ch == 1
