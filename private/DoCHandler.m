@@ -133,8 +133,13 @@ function [CellData, DensityROI] = DoCHandler(ROICoordinates, CellData, Lr_rad, R
     drawnow;
 
     % Save the figure
-    print(fullfile(Outputfolder, 'Clus-DoC Results', 'DoC Histograms', 'Pooled DoC histogram.tif'), ...
-        handles.handles.DoCFig, '-dtiff');
+    try 
+        print(fullfile(Outputfolder, 'Clus-DoC Results', 'DoC histograms', 'Pooled DoC histogram.tif'), ...
+            handles.handles.DoCFig, '-dtiff');
+    catch
+        currFig = getframe(handles.handles.DoCFig);
+        imwrite(currFig.cdata, fullfile(Outputfolder, 'Clus-DoC Results', 'DoC histograms', 'Pooled DoC histogram.tif'));
+    end
 
     close gcf;
     

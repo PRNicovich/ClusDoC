@@ -2509,14 +2509,24 @@ function ExportToTextPush(varargin)
 
             fID = fopen(fileName, 'w+');
 
-            headerString = sprintf('Index\tFirstFrame\tNumFrames\tNFramesMissing\tPostX[nm]\tPostY[nm]\tPrecision[nm]\tNPhotons\tBkgdVar\tChi^2\tPSFWidth[nm]\tChannel\tZSlice\tROINum\tInOutMask\tClusterID\tDoCScore\tLrValue\tCrossChanDensity\tLrAboveThreshold\tAllChanDensity\r\n');
+            if handles.NDataColumns == 13
+                headerString = sprintf('Index\tFirstFrame\tNumFrames\tNFramesMissing\tPostX[nm]\tPostY[nm]\tPrecision[nm]\tNPhotons\tBkgdVar\tChi^2\tPSFWidth[nm]\tChannel\tZSlice\tROINum\tInOutMask\tClusterID\tDoCScore\tLrValue\tCrossChanDensity\tLrAboveThreshold\tAllChanDensity\r\n');
+                fmtStr = strcat(repmat('%d\t', 1, 4), repmat('%.1f\t', 1, 3), '%d\t%.4f\t%.4f\t%.1f\t%d\t%d\t%s\t%d\t%d\t%.4f\t%.4f\t%.4f\t%d\t%.4f\r\n');
+            elseif handles.NDataColumns == 12
+                headerString = sprintf('Index\tFirstFrame\tNumFrames\tNFramesMissing\tPostX[nm]\tPostY[nm]\tPrecision[nm]\tNPhotons\tBkgdVar\tChi^2\tPSFWidth[nm]\tChannel\tROINum\tInOutMask\tClusterID\tDoCScore\tLrValue\tCrossChanDensity\tLrAboveThreshold\tAllChanDensity\r\n');
+                fmtStr = strcat(repmat('%d\t', 1, 4), repmat('%.1f\t', 1, 3), '%d\t%.4f\t%.4f\t%.1f\t%d\t%s\t%d\t%d\t%.4f\t%.4f\t%.4f\t%d\t%.4f\r\n');
+            else
+                error('Number of data columns not supported');
+            end
+            
             fprintf(fID, '%s', headerString);
 
-            fmtStr = strcat(repmat('%d\t', 1, 4), repmat('%.1f\t', 1, 3), '%d\t%.4f\t%.4f\t%.1f\t%d\t%d\t%s\t%d\t%d\t%.4f\t%.4f\t%.4f\t%d\t%.4f\r\n');
+            
             ROIIDStr = dec2bin(handles.CellData{fN}(:,14));
             for k = 1:size(handles.CellData{fN}, 1);
 
-                fprintf(fID, fmtStr, handles.CellData{fN}(k,1:13), ROIIDStr(k, :), handles.CellData{fN}(k, 15:end));
+                fprintf(fID, fmtStr, handles.CellData{fN}(k,1:handles.NDataColumns), ROIIDStr(k, :), ...
+                    handles.CellData{fN}(k, (handles.NDataColumns + 2):end));
 
             end
 
