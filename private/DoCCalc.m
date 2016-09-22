@@ -39,18 +39,22 @@ function [dataOut, SizeROI] = DoCCalc(Data, Lr_rad, Rmax, Step, roiHere)
     y2 = dataOut((dataOut(:,4) == 2) & (dataOut(:,8) == 1), 2);
 
 
-    assignin('base', 'x1', x1);
-    assignin('base', 'y1', y1);
-    assignin('base', 'x2', x2);
-    assignin('base', 'y2', y2);
+%     assignin('base', 'x1', x1);
+%     assignin('base', 'y1', y1);
+%     assignin('base', 'x2', x2);
+%     assignin('base', 'y2', y2);
     
     %[idx1,Dis]=rangesearch([x1 y1],[x1 y1],Rmax);
     %D1max=(cellfun(@length,idx1)-1)/(Rmax^2);
+    
+    % Why is this defined differently than the Ch2Ch1 version?
     D1max = sum((dataOut(:,4) == 1) & (dataOut(:,8) == 1))/SizeROI^2;
 
     %[idx2,Dis]=rangesearch([x2 y2],[x1 y1],Rmax);
     %D2max=(cellfun(@length,idx2))/(Rmax^2);
+    
     D2maxCh1Ch2 = sum((dataOut(:,4) == 2) & (dataOut(:,8) == 1))/SizeROI^2; % why is this defined one
+    % Why is this defined differently than the Ch2Ch1 version?
 
     D2maxCh2Ch1 = (cellfun(@length, rangesearch([x1 y1], [x2 y2], Rmax)))/(Rmax^2); % check for Ch2 points that are Rmax within Ch1
 
