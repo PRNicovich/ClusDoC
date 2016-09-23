@@ -1399,20 +1399,45 @@ function returnValue = setDBSCANParameters(handles)
         'Position', [0 220 250 20], 'horizontalalignment', 'center', 'Fontsize', 10);
     
     %%%%%%
-    handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 195/250 .6 .11],...
-        'SelectionChangedFcn', @changeDBSCANChannel);
-                  
+    
+    if verLessThan('matlab', '8.4');
+        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 195/250 .6 .11],...
+            'SelectionChangeFcn', @changeDBSCANChannel);
+    else
+        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 195/250 .6 .11],...
+            'SelectionChangedFcn', @changeDBSCANChannel);
+    end
+    
     handles.handles.DBSCANChannelSelect(1) = uicontrol(handles.handles.DBSCANChannelToggle, ...
         'Style', 'radiobutton', 'String', 'Ch 1', 'position', [15 4 50 20]);
     
     handles.handles.DBSCANChannelSelect(2) = uicontrol(handles.handles.DBSCANChannelToggle, ...
         'Style', 'radiobutton', 'String', 'Ch 2', 'position', [90 4 50 20]);
     
-    if handles.Nchannels > 1
-        handles.handles.DBSCANChannelToggle.Visible = 'on';
+    if verLessThan('matlab', '8.4')
+        
+        if handles.Nchannels > 1
+            
+            set(handles.handles.DBSCANChannelToggle, 'Visible', 'on');
+            
+        else
+            
+            set(handles.handles.DBSCANChannelToggle, 'Visible', 'on');
+            set(handles.handles.DBSCANChannelSelect(2), 'Enable', 'off');
+            
+        end
+        
+        
     else
-        handles.handles.DBSCANChannelToggle.Visible = 'on';
-        handles.handles.DBSCANChannelSelect(2).Enable = 'off';
+        
+        if handles.Nchannels > 1
+            
+            handles.handles.DBSCANChannelToggle.Visible = 'on';
+        else
+            handles.handles.DBSCANChannelToggle.Visible = 'on';
+            handles.handles.DBSCANChannelSelect(2).Enable = 'off';
+        end
+        
     end
         
     
@@ -1654,8 +1679,13 @@ function returnValue = setDoCParameters(handles)
         'Position', [260 220 250 20], 'horizontalalignment', 'center', 'Fontsize', 10);
     
     %%%%%%%%
-    handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.6 185/250 .3 .11],...
-        'SelectionChangedFcn', @changeDBSCANChannel);
+    if verLessThan('matlab', '8.4');
+        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 195/250 .6 .11],...
+            'SelectionChangeFcn', @changeDBSCANChannel);
+    else
+        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 195/250 .6 .11],...
+            'SelectionChangedFcn', @changeDBSCANChannel);
+    end
                   
     handles.handles.DBSCANChannelSelect(1) = uicontrol(handles.handles.DBSCANChannelToggle, ...
         'Style', 'radiobutton', 'String', 'Ch 1', 'position', [15 4 50 20]);
@@ -1663,11 +1693,22 @@ function returnValue = setDoCParameters(handles)
     handles.handles.DBSCANChannelSelect(2) = uicontrol(handles.handles.DBSCANChannelToggle, ...
         'Style', 'radiobutton', 'String', 'Ch 2', 'position', [90 4 50 20]);
     
-    if handles.Nchannels > 1
-        handles.handles.DBSCANChannelToggle.Visible = 'on';
+    if verLessThan('matlab', '8.4')
+        
+        if handles.Nchannels > 1
+            set(handles.handles.DBSCANChannelToggle, 'Visible', 'on');
+        else
+            set(handles.handles.DBSCANChannelToggle, 'Visible', 'on');
+            set(handles.handles.DBSCANChannelSelect(2), 'Enable', 'off');
+        end
+        
     else
-        handles.handles.DBSCANChannelToggle.Visible = 'on';
-        handles.handles.DBSCANChannelSelect(2).Enable = 'off';
+        if handles.Nchannels > 1
+            handles.handles.DBSCANChannelToggle.Visible = 'on';
+        else
+            handles.handles.DBSCANChannelToggle.Visible = 'on';
+            handles.handles.DBSCANChannelSelect(2).Enable = 'off';
+        end
     end
         
     %%%%%%%%
