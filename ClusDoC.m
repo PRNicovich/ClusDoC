@@ -31,8 +31,18 @@ function DoCGUIInitialize(varargin)
     % Load in icons used here, convert to appropriate format
     currFileName = mfilename('fullpath');
     currPath = fileparts(currFileName);   
-    [SquareSelectIcon, ~] = imread(strcat(currPath, '\private\SquareROIIcon.jpg'));
-    [PolySelectIcon, ~] = imread(strcat(currPath, '\private\PolyROIIcon.jpg'));
+	
+	if ispc
+		
+		[SquareSelectIcon, ~] = imread(strcat(currPath, '\private\SquareROIIcon.jpg'));
+		[PolySelectIcon, ~] = imread(strcat(currPath, '\private\PolyROIIcon.jpg'));
+		
+	else
+	
+		[SquareSelectIcon, ~] = imread(strcat(currPath, '/private/SquareROIIcon.jpg'));
+		[PolySelectIcon, ~] = imread(strcat(currPath, '/private/PolyROIIcon.jpg'));
+		
+	end
 
     handles.handles.b_panel = uipanel(fig1, 'Units', 'normalized', 'Position', [0 0.05, 1-panel_border, 0.90], ...
         'BackgroundColor', [1 1 1], 'BorderType', 'none', 'Tag', 'b_panel');
