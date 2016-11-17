@@ -31,18 +31,11 @@ function DoCGUIInitialize(varargin)
     % Load in icons used here, convert to appropriate format
     currFileName = mfilename('fullpath');
     currPath = fileparts(currFileName);   
-	
-	if ispc
+
+	[SquareSelectIcon, ~] = imread(fullfile(currPath, 'private', 'SquareROIIcon.jpg'));
+	[PolySelectIcon, ~] = imread(fullfile(currPath, 'private', 'PolyROIIcon.jpg'));
 		
-		[SquareSelectIcon, ~] = imread(strcat(currPath, '\private\SquareROIIcon.jpg'));
-		[PolySelectIcon, ~] = imread(strcat(currPath, '\private\PolyROIIcon.jpg'));
-		
-	else
-	
-		[SquareSelectIcon, ~] = imread(strcat(currPath, '/private/SquareROIIcon.jpg'));
-		[PolySelectIcon, ~] = imread(strcat(currPath, '/private/PolyROIIcon.jpg'));
-		
-	end
+
 
     handles.handles.b_panel = uipanel(fig1, 'Units', 'normalized', 'Position', [0 0.05, 1-panel_border, 0.90], ...
         'BackgroundColor', [1 1 1], 'BorderType', 'none', 'Tag', 'b_panel');
@@ -973,7 +966,7 @@ end
 
 function handles = loadMaskFiles(handles)
 
-    possibleFiles = ls(strcat(handles.Path_name, '\*.tif'));
+    possibleFiles = ls(fullfile(handles.Path_name, '*.tif'));
     
     handles.MaskFiles = cell(size(possibleFiles, 1), 1);
     handles.MaskImg = cell(size(possibleFiles, 1), 1);
