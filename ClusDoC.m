@@ -770,6 +770,7 @@ function Load_Data(~,~,~)
             set(handles.handles.OutputText, 'String', fullfile(handles.Path_name, 'Extracted_Region'));
             handles.Outputfolder = fullfile(handles.Path_name, 'Extracted_Region');
             set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+            set(handles.handles.alignMaskButton, 'enable', 'off');
             if handles.Nchannels == 1
                 set(handles.handles.hDoC_All1, 'enable', 'off');
             end
@@ -778,9 +779,10 @@ function Load_Data(~,~,~)
         end
 
         % Load mask files
-        
+        handles.MaskCellPair = zeros(size(handles.CellData, 1), 2);
         handles = loadMaskFiles(handles);
         handles.ClusterTable = [];
+        
         
         guidata(handles.handles.MainFig, handles);
         FunPlot(1);
@@ -1005,6 +1007,7 @@ function handles = loadMaskFiles(handles)
     handles.SelectedMask = 0;
     set(handles.handles.popupMask, 'String', handles.MaskFiles);
     set(handles.handles.popupMask, 'value', handles.SelectedMask + 1);
+    set(handles.handles.alignMaskButton, 'enable', 'on');
     
 
 end
@@ -1115,6 +1118,7 @@ function OutputEdit(varargin)
         set(handles.handles.OutputText, 'String', handles.Outputfolder);
 
         set(get(handles.handles.b_panel, 'children'), 'enable', 'on');
+        set(handles.handles.alignMaskButton, 'enable', 'off');
         set(handles.handles.ExportResultsButton, 'enable', 'off');
         if handles.Nchannels == 1
             set(handles.handles.hDoC_All1, 'enable', 'off');
