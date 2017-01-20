@@ -683,7 +683,16 @@ function Load_Data(~,~,~)
                 handles.NDataColumns = size(importData.Data, 2);
                 handles.CellData{k}(:,handles.NDataColumns + 2) = 1; % All data is in mask until set otherwise
                 handles.ROIMultiplier = importData.Footer{2}(1); % Conversion from coordinates.txt positions to nm
+                
+                
+                % Max size calc has some issues around certain imported ZEN
+                % files
                 handles.MaxSize = importData.Footer{2}(5)*10*importData.Footer{2}(1)/importData.Footer{2}(3); % FOV size, in nm
+                
+                if handles.MaxSize == 256;
+                    handles.MaxSize = handles.MaxSize*100;
+                end
+                
                 handles.ImportFiles{k} = fullfile(pathName, fileName{k});
                 
                 % Clear out any points outside of bounds [0 MaxSize];
