@@ -391,6 +391,12 @@ function [ data,idx,Dis,Density] = Lr_fun(X1, Y1, X2, Y2, r, SizeROI)
         end 
 end
 
+function colorOut = rgb(a, b, c)
+
+colorOut = [a, b, c]/255;
+
+end
+
 
 
 

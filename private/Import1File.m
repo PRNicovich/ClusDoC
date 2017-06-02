@@ -1,6 +1,9 @@
 % Import1File will pull the data from a Zeiss 1.txt file given in string to
 % filepath fname.  Output is structure with fields .Header, .Data, and
 % .Footer.
+% 
+% 05/14/2017 added support for Nikon SMLM file import.  Data is extracted
+% and placed into format to match 13-column Zeiss data file.
 
 function [Output] = Import1File(fname)
 
@@ -26,14 +29,18 @@ N_cols = numel(idx)+1; % Number of tabs in first line, plus 1
 
 [Head_text, Head_post] = textscan(fid, format_spec, N_cols, 'delimiter', '\t');
 
-Body_format = '%n';
-format_spec = repmat(Body_format, 1, numel(idx)+1);
+if length(Head_text{1}) == 24 % Nikon file format
+    format_spec = ['%s', repmat('%n', 1, 23)]; 
+else % Zeiss file format
+    Body_format = '%n';
+    format_spec = repmat(Body_format, 1, numel(idx)+1);
+end
 [Body_text, Body_post] = textscan(fid, format_spec, 'delimiter', '\t');
 
 % Odd end-of-file bit in Zeiss files I can't seem to replicate in
 % MATLAB-generated files.  Going to just search for the first string in the
 % footer and start from there. 
-
+floc = [];
 while 1
     ftloc = ftell(fid); % Get byte position of line you're on
     tline = fgetl(fid); % Read string from line
@@ -108,6 +115,37 @@ end
 
             Data = [Body_text{1} Body_text{2} Body_text{3} Body_text{4} Body_text{5} Body_text{6}...
                 Body_text{7} Body_text{8} Body_text{9} Body_text{10} Body_text{11} Body_text{12} Body_text{13} Body_text{14}]; 
+            
+        case 24 % Nikon format
+
+            % Need to get channel ID out of a string ID in the first
+            % column
+
+            channelID = ones(length(Body_text{1}), 1);
+            possibleChannels = unique(Body_text{1});
+            if length(unique(Body_text{1})) > 1
+                for k = 1:length(possibleChannels)
+                    channelID(strcmp(Body_text{1}, possibleChannels{k}), 1) = k;
+                end
+            end
+            
+            Data = [(1:(length(Body_text{1})))', Body_text{13}, Body_text{14}, zeros(length(Body_text{1}), 1), ...
+                    Body_text{23}, Body_text{24}, Body_text{19}, Body_text{20}, Body_text{11}, zeros(length(Body_text{1}), 1), ...
+                    Body_text{8}, channelID, Body_text{18}];
+                
+            % Take a crack at the Footer info based on knowledge of Nikon
+            % imaging criteria and data in file.
+            % 160 nm pixel size explicitly constrained.
+            % Allow power of 2 for pixel number. 
+            
+            Footer_text{1} = {'VoxelSizeX'; 'VoxelSizeY'; 'ResolutionX'; ...
+                              'ResolutionY'; 'SizeX'; 'SizeY'};
+                     % [0.16 \mum, 0.16 \mum, 0.1 \mum, 0.1 \mum, closest
+                     % power of 2, closest power of 2];
+                     closestPow2 = 2^max([ceil(log2(max(Data(:,5)/160))), ...
+                                          ceil(log2(max(Data(:,6)/160)))]);
+            Footer_text{2} = [0.16, 0.16, 0.1, 0.1, closestPow2/0.1, closestPow2/0.1];
+
     end
 
 
