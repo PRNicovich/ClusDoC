@@ -19,7 +19,15 @@ fid = fopen(filepath);
 % Issue with new file formats: a 13th column of data (Z Slice) is included
 % in some files.  Check if it is present by counting tabs in the first
 % line.
-TABCHAR = sprintf('\t');
+[~, ~, ext] = fileparts(filepath);
+if strcmp(ext, '.txt')
+    TABCHAR = sprintf('\t');
+elseif strcmp(ext, '.csv')
+    TABCHAR = sprintf(',');
+else
+    error('File name extension not supported. File must be .txt or .csv');
+end
+
 idx = find(fgetl(fid) == TABCHAR);
 fseek(fid, 0, -1);
 
@@ -27,7 +35,7 @@ fseek(fid, 0, -1);
 format_spec = '%s';
 N_cols = numel(idx)+1; % Number of tabs in first line, plus 1
 
-[Head_text, Head_post] = textscan(fid, format_spec, N_cols, 'delimiter', '\t');
+[Head_text, Head_post] = textscan(fid, format_spec, N_cols, 'delimiter', TABCHAR);
 
 if length(Head_text{1}) == 24 % Nikon file format
     format_spec = ['%s', repmat('%n', 1, 23)]; 
@@ -35,7 +43,7 @@ else % Zeiss file format
     Body_format = '%n';
     format_spec = repmat(Body_format, 1, numel(idx)+1);
 end
-[Body_text, Body_post] = textscan(fid, format_spec, 'delimiter', '\t');
+[Body_text, Body_post] = textscan(fid, format_spec, 'delimiter', TABCHAR);
 
 % Odd end-of-file bit in Zeiss files I can't seem to replicate in
 % MATLAB-generated files.  Going to just search for the first string in the
@@ -93,8 +101,65 @@ else
 end
 
     % Assign variables pulled out of each step.
+    % Output table needs to be in order:
+    % 1.  Index	
+    % 2.  First Frame	
+    % 3.  Number Frames	
+    % 4.  Frames Missing	
+    % 5.  Position X [nm]	
+    % 6.  Position Y [nm]	
+    % 7.  Precision [nm]	
+    % 8.  Number Photons	
+    % 9.  Background variance	
+    % 10. Chi square	
+    % 11. PSF width [nm]	
+    % 12. Channel	
+    % 13. Z Slice
 
     switch length(Body_text)
+        
+        case 10 % ThunderSTORM format.  The user should have chosen the .csv file.  There's an associated XML-ish
+                % .txt file that has metadata and at least the pixel size in it. 
+                % This file must be the same name as the input but with
+                % -protocol.txt appended.
+                
+                Data = [Body_text{1}, Body_text{2}, ones(length(Body_text{1}), 1), ...
+                        zeros(length(Body_text{1}), 1), Body_text{3}, Body_text{4}, ...
+                        Body_text{10}, Body_text{6}, Body_text{8}, Body_text{9}, Body_text{5}, ...
+                        ones(length(Body_text{1}), 1), ones(length(Body_text{1}), 1)];
+                
+                [folderPath, metaDataFile, ~] = fileparts(filepath);
+                mdID = fopen(fullfile(folderPath, strcat(metaDataFile, '-protocol.txt')));
+                
+                if mdID ~= -1
+                    % proceed
+                    % Pull out pixel size
+                    md = textscan(mdID, '%s', 'delimiter', '\n');
+                    md = md{1};
+                    pixMD = ~cellfun(@isempty, strfind(md, 'pixel'));
+                    if sum(pixMD) ~= 1
+                        error('Format of protocol file incorrect');
+                    end
+
+                    splitMD = textscan(md{pixMD}, '%s %f,');
+                    pixelSizenm = splitMD{2};
+
+                    
+                else
+                    error('Associated ThunderSTORM *-protocol.txt file not found. Please ensure file is correctly named an in same folder as data CSV file.');
+                end
+                % Example data was only single-channel data.  Assuming this
+                % is true for all ThunderSTORM data from here and filling
+                % in dummy '1' values for all channels. 
+                
+                Footer_text{1} = {'VoxelSizeX'; 'VoxelSizeY'; 'ResolutionX'; ...
+                                  'ResolutionY'; 'SizeX'; 'SizeY'};
+                     % [pixelSizenm/1e3 \mum, pixelSizenm/1e3 \mum, 0.1 \mum, 0.1 \mum, closest
+                     % power of 2, closest power of 2];
+                     closestPow2 = 2^max([ceil(log2(max(Data(:,5)/pixelSizenm))), ...
+                                          ceil(log2(max(Data(:,6)/pixelSizenm)))]);
+            Footer_text{2} = [pixelSizenm/1e3, pixelSizenm/1e3, 0.1, 0.1, ...
+                                closestPow2/0.1, closestPow2/0.1];
 
         case 12
 

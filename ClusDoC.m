@@ -648,13 +648,13 @@ function Load_Data(~,~,~)
     set(get(handles.handles.b_panel, 'children'), 'enable', 'off');
 
     
-    [fileName, pathName, filterIndex] = uigetfile({'*.txt'; 'ZEN export table'},'Select ZEN export files', 'MultiSelect', 'on');
+    [fileName, pathName, filterIndex] = uigetfile({'*.txt', 'ZEN export table'; '*.csv', 'ThunderSTORM Export table'},'Select ZEN export files', 'MultiSelect', 'on');
     
     if ischar(fileName)
         fileName = {fileName};
     end
 
-    if filterIndex == 1
+    if ismember(filterIndex, [1, 2]);
         
         w = waitbar(0, 'Loading files...');
     
@@ -704,7 +704,7 @@ function Load_Data(~,~,~)
                 
             else
                 
-                fprintf(1, 'File not in ZEN Export table format.\nSkipping %s\n', fullfile(pathName, fileName{k}));
+                fprintf(1, 'File not in accepted coordinate table format.\nSkipping %s\n', fullfile(pathName, fileName{k}));
                 skipList(k) = 1;
 
             end
@@ -816,9 +816,24 @@ function Load_Data(~,~,~)
             isGood = true;
             % Is good Nikon file, which will get interpreted into Zeiss
             % format in Import1File
+        elseif ismember(nTabs, 0) 
+                fID = fopen(fName, 'r');
+                firstLine = fgetl(fID);
+                nTabs = length(strfind(firstLine, sprintf(',')));
+                firstEntry = firstLine(1:5);
+                fclose(fID);
+                
+                if ismember(nTabs, 9) && strcmp(firstEntry, '"id",')
+                    isGood = true;
+                    % Is good ThunderSTORM file
+                else
+                    isGood = false;
+                end
         else
             isGood = false;
         end
+        
+        print isGood
     
     end
 
