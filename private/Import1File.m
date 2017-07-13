@@ -118,7 +118,7 @@ end
 
     switch length(Body_text)
         
-        case 10 % ThunderSTORM format.  The user should have chosen the .csv file.  There's an associated XML-ish
+        case {10, 11} % ThunderSTORM format.  The user should have chosen the .csv file.  There's an associated XML-ish
                 % .txt file that has metadata and at least the pixel size in it. 
                 % This file must be the same name as the input but with
                 % -protocol.txt appended.
