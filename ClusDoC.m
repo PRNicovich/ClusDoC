@@ -817,13 +817,14 @@ function Load_Data(~,~,~)
             % Is good Nikon file, which will get interpreted into Zeiss
             % format in Import1File
         elseif ismember(nTabs, 0) 
+
                 fID = fopen(fName, 'r');
                 firstLine = fgetl(fID);
                 nTabs = length(strfind(firstLine, sprintf(',')));
                 firstEntry = firstLine(1:5);
                 fclose(fID);
                 
-                if ismember(nTabs, 9) && strcmp(firstEntry, '"id",')
+                if ismember(nTabs, [9, 10]) && strcmp(firstEntry, '"id",')
                     isGood = true;
                     % Is good ThunderSTORM file
                 else
@@ -832,8 +833,6 @@ function Load_Data(~,~,~)
         else
             isGood = false;
         end
-        
-        print isGood
     
     end
 
