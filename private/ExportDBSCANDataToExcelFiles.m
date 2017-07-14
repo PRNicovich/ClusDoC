@@ -23,9 +23,34 @@ function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder, chan)
 
     Matrix_Result = [Percent_in_Cluster_column*100 , Number_column(:,1) , Area_column(:,1) , Density_column*1e6 ,...
         RelativeDensity_column, TotalNumber, Circularity_column, Number_Cluster_column, Number_Cluster_column./(1e-6*cellROIPair(:,5))];
+    
+    try 
 
-    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), cellROIPair, sprintf('Chan%d', chan), 'A2');
-    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), HeaderArray, sprintf('Chan%d', chan), 'A1');
-    xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), Matrix_Result, sprintf('Chan%d', chan), 'G2');
+        xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), cellROIPair, sprintf('Chan%d', chan), 'A2');
+        xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), HeaderArray, sprintf('Chan%d', chan), 'A1');
+        xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), Matrix_Result, sprintf('Chan%d', chan), 'G2');
+        
+    catch 
+        % Catch error for xlswrite that exists on some machines
+        % Format as text file and export to tab-delimited text file
+     
+        fprintf(1, 'Error in xlswrite.  Reverting to tab-delimited text file output.\n');
+        
+        assignin('base', 'cellROIPair', cellROIPair);
+        assignin('base', 'HeaderArray', HeaderArray);
+        assignin('base', 'Matrix_Result', Matrix_Result);
+        
+        matOut = [cellROIPair, nan(size(cellROIPair, 1), 1), Matrix_Result];
+        fID = fopen(fullfile(outputFolder, sprintf('DBSCAN Results Chan%d.txt', chan)), 'w+');
+        fprintf(fID, strcat(repmat('%s\t', 1, length(HeaderArray)-1), '%s\r\n'), HeaderArray{:});
+        
+        fmtString = strcat(repmat('%f\t', 1, length(HeaderArray)-1), '%f\r\n');
+        
+        for k = 1:size(matOut, 1)
+            fprintf(fID, fmtString, matOut(k,:));
+        end
+        fclose(fID);
+        
+    end
 
 end
