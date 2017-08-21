@@ -2,6 +2,39 @@ function [datathr, ClusterSmooth, SumofContour, classOut, varargout] = DBSCANHan
 
 % vargout = {fig1Handle, fig2Handle, fig3Handle, Results}
 
+
+    % Check if clustering is even possible on this dataset.  
+    % If no clustering can be achieved, there is a chance that the MEX file
+    % will fail and crash MATLAB.  
+    % To pass test, there have to be at least DBSCANParams.minPts points
+    % that are within DBSCANParams.epsilon distance from other points.  
+    distRow = pdist(Data(:,1:2));
+    nPossibleClustering = sum(distRow < DBSCANParams.epsilon);
+    if nPossibleClustering >= DBSCANParams.minPts
+        checkClusterTest = true;
+    else
+        checkClusterTest = false;
+    end
+    
+
+    if ~checkClusterTest
+        % No chance of a cluster.  MEX code is going to throw a fault.
+        % Skip this ROI.
+        
+        datathr = Data;
+        classOut = zeros(size(Data, 1), 1);
+        class = [];
+        ClusterSmooth=cell(max(class),1);
+        SumofContour = {};
+        varargout{1} = [];
+        varargout{2} = [];
+        varargout{3} = [];
+        varargout{4} = [];
+        
+        return
+        
+    end
+
 try 
 
     %   Data = Zen format
@@ -126,122 +159,133 @@ try
         SumofSmallContour=[];
         ClusterSmooth=cell(max(class),1);
 
-        for i = 1:max(class)
-
-            xin = datathr(class == i,:); % Positions contained in the cluster i
-
-    %         assignin('base', 'xin', xin);
-
-            if display1 || ~printOutFig
-                plot(ax1,xin(:,1), xin(:,2),'Marker', '.', 'MarkerSize', 5,'LineStyle', 'none', 'color', clusterColor);
-            end   
-
-            [dataT, idxT, DisT, Density20 ] = Lr_fun(xin(:,1), xin(:,2), xin(:,1), xin(:,2) , 20, SizeROI); % Included in FunDBSCAN4DoC_GUIV2
-                                                                                                                % Unsure how this is carried forward
+        if isempty(class)
             
-            [ClusImage,  Area, Circularity, Nb, contour, edges, Cutoff_point] = Smoothing_fun4cluster(xin(:,1:2), DBSCANParams, false, false); % 0.1*max intensity 
-
-            ClusterSmooth{i,1}.ClusterID = i;
-            ClusterSmooth{i,1}.Points = xin(:,1:2);
-            ClusterSmooth{i,1}.Image = ClusImage;
-            ClusterSmooth{i,1}.Area = Area;%
-            ClusterSmooth{i,1}.Nb = Nb;%
-            ClusterSmooth{i,1}.edges = edges;%
-            ClusterSmooth{i,1}.Cutoff_point = Cutoff_point;
-            ClusterSmooth{i,1}.Contour = contour;%
-            ClusterSmooth{i,1}.Circularity = Circularity;%
-            ClusterSmooth{i,1}.TotalAreaDensity = AvDensity;%
-            ClusterSmooth{i,1}.Density_Nb_A = Nb/Area;%
-            ClusterSmooth{i,1}.RelativeDensity_Nb_A=Nb/Area/AvDensity;%
-            ClusterSmooth{i,1}.NInsideMask = sum(maskVector(class == i));
-            ClusterSmooth{i,1}.NOutsideMask = sum(~maskVector(class == i));
-
-            ClusterSmooth{i,1}.Density20 = Density20;%
+            % Collection of output variables when DBSCAN returns no
+            % clusters.
             
-            ClusterSmooth{i,1}.RelativeDensity20 = Density20 / AvDensity;%
+            SumofContour = {SumofBigContour, SumofSmallContour}; 
             
             
-            ClusterSmooth{i,1}.AvRelativeDensity20 = mean(Density20/AvDensity); %
-
-            if DBSCANParams.UseLr_rThresh
-                ClusterSmooth{i,1}.Density = Density(class == i);%
-                ClusterSmooth{i,1}.RelativeDensity = Density(class == i)/AvDensity;%
-                ClusterSmooth{i,1}.RelativeDensity = Density(class == i)/AvDensity;
-                ClusterSmooth{i,1}.Mean_Density = mean(Density(class == i));
-                ClusterSmooth{i,1}.AvRelativeDensity = mean(Density(class == i)/AvDensity);%
-                 
-            end
+        else
             
-            if nargin == 10 % DoC analysis.  Vector of DoC scores for each point is an input.
-              
-                ClusterSmooth{i,1}.Density = Density(class == i);%
-                ClusterSmooth{i,1}.MeanDoC = mean(DoCScore(class == i));
-                
-                Point_In = xin(DoCScore(class == i) >= DBSCANParams.DoCThreshold, 1:2);
-                Nb_In = size(Point_In,1);
+            for i = 1:max(class)
 
-                if Nb_In > 1
-                    Density20_In = Density20(DoCScore(class == i) >= DBSCANParams.DoCThreshold);
-%                     [Contour_In] = Smoothing_fun4clusterV3_3(Point_In, 0,0);
-                    
-                    [~,  ~, ~, ~, Contour_In, ~, ~] = Smoothing_fun4cluster(Point_In, DBSCANParams, 0, 0);
+                xin = datathr(class == i,:); % Positions contained in the cluster i
 
-                    Area_In = polyarea(Contour_In(:,1),Contour_In(:,2));
+        %         assignin('base', 'xin', xin);
+
+                if display1 || ~printOutFig
+                    plot(ax1,xin(:,1), xin(:,2),'Marker', '.', 'MarkerSize', 5,'LineStyle', 'none', 'color', clusterColor);
+                end   
+
+                [dataT, idxT, DisT, Density20 ] = Lr_fun(xin(:,1), xin(:,2), xin(:,1), xin(:,2) , 20, SizeROI); % Included in FunDBSCAN4DoC_GUIV2
+                                                                                                                    % Unsure how this is carried forward
+
+                [ClusImage,  Area, Circularity, Nb, contour, edges, Cutoff_point] = Smoothing_fun4cluster(xin(:,1:2), DBSCANParams, false, false); % 0.1*max intensity 
+
+                ClusterSmooth{i,1}.ClusterID = i;
+                ClusterSmooth{i,1}.Points = xin(:,1:2);
+                ClusterSmooth{i,1}.Image = ClusImage;
+                ClusterSmooth{i,1}.Area = Area;%
+                ClusterSmooth{i,1}.Nb = Nb;%
+                ClusterSmooth{i,1}.edges = edges;%
+                ClusterSmooth{i,1}.Cutoff_point = Cutoff_point;
+                ClusterSmooth{i,1}.Contour = contour;%
+                ClusterSmooth{i,1}.Circularity = Circularity;%
+                ClusterSmooth{i,1}.TotalAreaDensity = AvDensity;%
+                ClusterSmooth{i,1}.Density_Nb_A = Nb/Area;%
+                ClusterSmooth{i,1}.RelativeDensity_Nb_A=Nb/Area/AvDensity;%
+                ClusterSmooth{i,1}.NInsideMask = sum(maskVector(class == i));
+                ClusterSmooth{i,1}.NOutsideMask = sum(~maskVector(class == i));
+
+                ClusterSmooth{i,1}.Density20 = Density20;%
+
+                ClusterSmooth{i,1}.RelativeDensity20 = Density20 / AvDensity;%
 
 
-                    ClusterSmooth{i,1}.Nb_In = Nb_In;
-                    ClusterSmooth{i,1}.Area_In = Area_In;
-                    ClusterSmooth{i,1}.AvRelativeDensity20_In = mean(Density20_In/AvDensity);
+                ClusterSmooth{i,1}.AvRelativeDensity20 = mean(Density20/AvDensity); %
 
-%                     plot(ax1,Contour_In(:,1),Contour_In(:,2),'r');
+                if DBSCANParams.UseLr_rThresh
+                    ClusterSmooth{i,1}.Density = Density(class == i);%
+                    ClusterSmooth{i,1}.RelativeDensity = Density(class == i)/AvDensity;%
+                    ClusterSmooth{i,1}.RelativeDensity = Density(class == i)/AvDensity;
+                    ClusterSmooth{i,1}.Mean_Density = mean(Density(class == i));
+                    ClusterSmooth{i,1}.AvRelativeDensity = mean(Density(class == i)/AvDensity);%
 
-%                     DoCOut = Data_DoCi(Data_DoCi.DoC<0.4,:);
-                    Density20_Out = Density20(DoCScore(class == i) >= DBSCANParams.DoCThreshold);
+                end
 
-                    Nb_Out = length(Density20_Out);
-                    ClusterSmooth{i,1}.Nb_Out = Nb_Out;
-                    ClusterSmooth{i,1}.AvRelativeDensity20_Out = mean(Density20_Out/AvDensity);
+                if nargin == 10 % DoC analysis.  Vector of DoC scores for each point is an input.
 
-                    ClusterSmooth{i,1}.DensityRatio = mean(Density20_In/AvDensity)/mean(Density20_Out/AvDensity);
-                    ClusterSmooth{i,1}.Contour_In = Contour_In;
+                    ClusterSmooth{i,1}.Density = Density(class == i);%
+                    ClusterSmooth{i,1}.MeanDoC = mean(DoCScore(class == i));
 
-                    else
+                    Point_In = xin(DoCScore(class == i) >= DBSCANParams.DoCThreshold, 1:2);
+                    Nb_In = size(Point_In,1);
+
+                    if Nb_In > 1
+                        Density20_In = Density20(DoCScore(class == i) >= DBSCANParams.DoCThreshold);
+    %                     [Contour_In] = Smoothing_fun4clusterV3_3(Point_In, 0,0);
+
+                        [~,  ~, ~, ~, Contour_In, ~, ~] = Smoothing_fun4cluster(Point_In, DBSCANParams, 0, 0);
+
+                        Area_In = polyarea(Contour_In(:,1),Contour_In(:,2));
+
+
                         ClusterSmooth{i,1}.Nb_In = Nb_In;
-                        ClusterSmooth{i,1}.Area_In = 0;
-                        ClusterSmooth{i,1}.AvRelativeDensity20_In = 0;
+                        ClusterSmooth{i,1}.Area_In = Area_In;
+                        ClusterSmooth{i,1}.AvRelativeDensity20_In = mean(Density20_In/AvDensity);
 
-                        ClusterSmooth{i,1}.DensityRatio =0;
-                        ClusterSmooth{i,1}.Contour_In = 0; 
+    %                     plot(ax1,Contour_In(:,1),Contour_In(:,2),'r');
+
+    %                     DoCOut = Data_DoCi(Data_DoCi.DoC<0.4,:);
+                        Density20_Out = Density20(DoCScore(class == i) >= DBSCANParams.DoCThreshold);
+
+                        Nb_Out = length(Density20_Out);
+                        ClusterSmooth{i,1}.Nb_Out = Nb_Out;
+                        ClusterSmooth{i,1}.AvRelativeDensity20_Out = mean(Density20_Out/AvDensity);
+
+                        ClusterSmooth{i,1}.DensityRatio = mean(Density20_In/AvDensity)/mean(Density20_Out/AvDensity);
+                        ClusterSmooth{i,1}.Contour_In = Contour_In;
+
+                        else
+                            ClusterSmooth{i,1}.Nb_In = Nb_In;
+                            ClusterSmooth{i,1}.Area_In = 0;
+                            ClusterSmooth{i,1}.AvRelativeDensity20_In = 0;
+
+                            ClusterSmooth{i,1}.DensityRatio =0;
+                            ClusterSmooth{i,1}.Contour_In = 0; 
+                    end
+
+
                 end
-                                    
-                
-            end
-            
-            
-            
-            
-            
 
-            if Nb >= DBSCANParams.Cutoff
-                SumofBigContour = [SumofBigContour; contour; NaN NaN ];
-            else
-                SumofSmallContour = [SumofSmallContour; contour; NaN NaN ];  
-            end
-            SumofContour={SumofBigContour, SumofSmallContour};
 
-            % Plot the contour
 
-            if display1 || ~printOutFig
 
-                if length(Nb) > DBSCANParams.Cutoff % Does this switch do anything?
-                    plot(ax1, contour(:,1), contour(:,2), 'color', 'red');
-                    set(ax1, 'box', 'on', 'XTickLabel', [], 'XTick', [], 'YTickLabel', [], 'YTick', []);
+
+
+                if Nb >= DBSCANParams.Cutoff
+                    SumofBigContour = [SumofBigContour; contour; NaN NaN ];
                 else
-                    plot(ax1, contour(:,1), contour(:,2), 'color', rgb(44, 62, 80));
+                    SumofSmallContour = [SumofSmallContour; contour; NaN NaN ];  
+                end
+                SumofContour={SumofBigContour, SumofSmallContour};
+
+                % Plot the contour
+
+                if display1 || ~printOutFig
+
+                    if length(Nb) > DBSCANParams.Cutoff % Does this switch do anything?
+                        plot(ax1, contour(:,1), contour(:,2), 'color', 'red');
+                        set(ax1, 'box', 'on', 'XTickLabel', [], 'XTick', [], 'YTickLabel', [], 'YTick', []);
+                    else
+                        plot(ax1, contour(:,1), contour(:,2), 'color', rgb(44, 62, 80));
+                    end
+
                 end
 
             end
-
         end
              ClusterSmooth = ClusterSmooth(~cellfun('isempty', ClusterSmooth));
 

@@ -2,9 +2,12 @@ function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder, chan)
 
     % Formerly Final_Result_DBSCAN_GUIV2
     % Extracts and exports Results table into Excel format
-
+    
     A = Result(:);
+    
+    cellROIPair(cellfun('isempty', A), :) = []; % filter out empty ones
     A = A(~cellfun('isempty', A));
+    
     Percent_in_Cluster_column = cell2mat(cellfun(@(x) x.Percent_in_Cluster, A, 'UniformOutput', false));
     Number_column = cell2mat(cellfun(@(x) x.Number, A, 'UniformOutput', false));
     Area_column = cell2mat(cellfun(@(x) x.Area, A , 'UniformOutput', false));

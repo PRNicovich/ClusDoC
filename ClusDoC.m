@@ -2069,8 +2069,10 @@ function DBSCAN_Test(~, ~, ~)
     whichPointsInROI = fliplr(dec2bin(handles.CellData{handles.CurrentCellData}(:,handles.NDataColumns + 1)));
     whichPointsInROI = whichPointsInROI(:,handles.CurrentROIData) == '1';
     
-    dataCropped = handles.CellData{handles.CurrentCellData}(whichPointsInROI, :);
 
+    
+    dataCropped = handles.CellData{handles.CurrentCellData}(whichPointsInROI, :);
+    
     for ch = 1:2
         handles.DBSCAN(ch).UseLr_rThresh = false;
         handles.DBSCAN(ch).DoStats = false;
@@ -2343,6 +2345,14 @@ function DBSCAN_All(~, ~, ~)
                             
                             handles.ClusterTable = AppendToClusterTable(handles.ClusterTable, chan, c, roiInc, ClusterSmoothTable{roiInc, c}, classOut);
 
+                        else
+                            % Have chosen an empty region as ROI
+                            
+                            fprintf(1, 'Cell %d - ROI %d is empty.  Skipping.\n', c, roiInc);
+                            
+                            ClusterSmoothTable{roiInc, c} = [];
+                            classOut = [];
+                            Result{roiInc, c} = [];
 
                         end
 
@@ -2351,8 +2361,11 @@ function DBSCAN_All(~, ~, ~)
                     end % ROI
                 end % Cell
 
-                
-                ExportDBSCANDataToExcelFiles(cellROIPair, Result, strcat(handles.Outputfolder, '\DBSCAN Results'), chan);
+                if ~all(cellfun(@isempty, Result))
+                    ExportDBSCANDataToExcelFiles(cellROIPair, Result, strcat(handles.Outputfolder, '\DBSCAN Results'), chan);
+                else
+                    fprintf(1, 'All cells and ROIs empty.  Skipping export.\n');
+                end
                 
                 if chan == 1
                     ClusterTableChan1 = ClusterSmoothTable;
@@ -2379,6 +2392,11 @@ function DBSCAN_All(~, ~, ~)
                 set(handles.handles.hDoC_All1, 'enable', 'off');
             end
             drawnow;
+            
+            assignin('base', 'cellROIPair', cellROIPair);
+            assignin('base', 'Result', Result);
+            assignin('base', 'outputFolder', strcat(handles.Outputfolder, '\DBSCAN Results'));
+            assignin('base', 'chan', chan);
             
             display('DBSCAN processing exited with errors.');
             rethrow(mError);
@@ -2728,24 +2746,26 @@ function clusterTableOut = AppendToClusterTable(clusterTable, Ch, cellIter, roiI
         appendTable(:, 5) = cell2mat(cellfun(@(x) size(x.Points, 1), ClusterCh, 'uniformoutput', false)); % NPoints
         appendTable(:, 6) = cellfun(@(x) x.Nb, ClusterCh); % Nb
 
-        if isfield(ClusterCh{1}, 'MeanDoC')
-            appendTable(:, 7) = cellfun(@(x) x.MeanDoC, ClusterCh); % MeanDoCScore
+        if ~isempty(ClusterCh)
+            
+            if isfield(ClusterCh{1}, 'MeanDoC')
+                appendTable(:, 7) = cellfun(@(x) x.MeanDoC, ClusterCh); % MeanDoCScore
+            end
+            
+            if isfield(ClusterCh{1}, 'AvRelativeDensity')
+                appendTable(:, 11) = cellfun(@(x) x.AvRelativeDensity, ClusterCh); % AvRelativeDensity
+                appendTable(:, 12) = cellfun(@(x) x.Mean_Density, ClusterCh); % MeanDensity
+            end
+            
+            if isfield(ClusterCh{1}, 'Nb_In')
+                appendTable(:, 13) = cellfun(@(x) x.Nb_In, ClusterCh); % Nb_In
+            end
+            
         end
 
         appendTable(:, 8) = cellfun(@(x) x.Area, ClusterCh); % Area
         appendTable(:, 9) = cellfun(@(x) x.Circularity, ClusterCh); % Circularity
         appendTable(:, 10) = cellfun(@(x) x.TotalAreaDensity, ClusterCh); % TotalAreaDensity
-        
-        if isfield(ClusterCh{1}, 'AvRelativeDensity')
-            appendTable(:, 11) = cellfun(@(x) x.AvRelativeDensity, ClusterCh); % AvRelativeDensity
-            appendTable(:, 12) = cellfun(@(x) x.Mean_Density, ClusterCh); % MeanDensity
-        end
-        
-        if isfield(ClusterCh{1}, 'Nb_In')
-            appendTable(:, 13) = cellfun(@(x) x.Nb_In, ClusterCh); % Nb_In
-        end
-        
-
         
         appendTable(:, 14) = cellfun(@(x) x.NInsideMask, ClusterCh); % NPointsInsideMask
         appendTable(:, 15) = cellfun(@(x) x.NOutsideMask, ClusterCh); % NPointsInsideMask
