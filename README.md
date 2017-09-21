@@ -8,7 +8,7 @@ Pageon, Sophie V., et al. "Functional role of T-cell receptor nanoclusters in si
 # Requirements
 
 - MATLAB 2014b or later
-- Distributed computing and statistical analyses toolboxes
+- Distributed computing, Image Processing, and statistical analyses toolboxes
 
 Compiled dependent MEX functions for 64 bit PC are included in the repository.  Source files are included in the .\private\mexSource folder.  You will need to compile these functions and replace those in the .\private\ folder to run on architectures other than 64 bit Windows.  
 
