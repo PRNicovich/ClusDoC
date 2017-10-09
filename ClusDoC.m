@@ -370,6 +370,7 @@ function initializeParameters(varargin)
     handles.DoC.Rmax = 500;
     handles.DoC.Step = 10;
     handles.DoC.ColoThres = 0.4;
+    handles.DoC.NbThresh = 10;
     
     handles.ClusterTable = [];
     
@@ -1650,19 +1651,19 @@ function returnValue = setDoCParameters(handles)
 
    handles.handles.DoCSettingsFig = figure();
    set(handles.handles.DoCSettingsFig, 'Tag', 'ClusDoC');
-    resizeFig(handles.handles.DoCSettingsFig, [510 250]);
-    set(handles.handles.DoCSettingsFig, 'toolbar', 'none', 'menubar', 'none', ...
+    resizeFig(handles.handles.DoCSettingsFig, [510 306]);
+    set(handles.handles.DoCSettingsFig, 'toolbar', 'figure', 'menubar', 'none', ...
         'name', 'DoC Parameters');
     
     ch = 1;
    
     handles.handles.DoCSettingsTitleText(2) = uicontrol('Style', 'text', ...
         'String', '_____________________', 'parent', handles.handles.DoCSettingsFig,...
-        'Position', [0 185 200 20], 'horizontalalignment', 'center', 'Fontsize', 10);
+        'Position', [0 197 200 20], 'horizontalalignment', 'center', 'Fontsize', 10);
 
 	handles.handles.DoCSettingsTitleText(1) = uicontrol('Style', 'text', ...
         'String', 'Degree of Colocalization Parameters', 'parent', handles.handles.DoCSettingsFig,...
-        'Position', [0 190 200 35], 'horizontalalignment', 'center', 'Fontsize', 10);
+        'Position', [0 207 200 35], 'horizontalalignment', 'center', 'Fontsize', 10);
     
     %%%%%%
     
@@ -1682,6 +1683,10 @@ function returnValue = setDoCParameters(handles)
         'String', 'Colocalization Threshold:', 'parent', handles.handles.DoCSettingsFig,...
         'Position', [0 60 100 30], 'horizontalalignment', 'right');
     
+	handles.handles.DoCSettingsText(5) = uicontrol('Style', 'text', ...
+        'String', 'Min Coloc''d Points/Cluster:', 'parent', handles.handles.DoCSettingsFig,...
+        'Position', [0 20 100 30], 'horizontalalignment', 'right');
+    
 	%%%%%%%%%%
     
     handles.handles.DoCSettingsEdit(1) = uicontrol('Style', 'edit', ...
@@ -1700,6 +1705,10 @@ function returnValue = setDoCParameters(handles)
         'String', num2str(handles.DoC.ColoThres), 'parent', handles.handles.DoCSettingsFig,...
         'Position', [120 67 60 20]);
     
+	handles.handles.DoCSettingsEdit(5) = uicontrol('Style', 'edit', ...
+        'String', num2str(handles.DoC.NbThresh), 'parent', handles.handles.DoCSettingsFig,...
+        'Position', [120 32 60 20]);
+    
     
     %%%%%%%%%%%%%%%
     % DoC - DBSCAN settings
@@ -1714,18 +1723,18 @@ function returnValue = setDoCParameters(handles)
     
     %%%%%%%%
     if verLessThan('matlab', '8.4');
-        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 195/250 .6 .11],...
+        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 .83 .6 .11],...
             'SelectionChangeFcn', @changeDBSCANChannel);
     else
-        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 195/250 .6 .11],...
+        handles.handles.DBSCANChannelToggle = uibuttongroup('Visible', 'on', 'Position',[.2 .83 .6 .11],...
             'SelectionChangedFcn', @changeDBSCANChannel);
     end
                   
     handles.handles.DBSCANChannelSelect(1) = uicontrol(handles.handles.DBSCANChannelToggle, ...
-        'Style', 'radiobutton', 'String', 'Ch 1', 'position', [15 4 50 20]);
+        'Style', 'radiobutton', 'String', 'Ch 1', 'position', [69 7 50 20]);
     
     handles.handles.DBSCANChannelSelect(2) = uicontrol(handles.handles.DBSCANChannelToggle, ...
-        'Style', 'radiobutton', 'String', 'Ch 2', 'position', [90 4 50 20]);
+        'Style', 'radiobutton', 'String', 'Ch 2', 'position', [190 7 50 20]);
     
     if verLessThan('matlab', '8.4')
         
@@ -1909,6 +1918,7 @@ function returnValue = setDoCParameters(handles)
         handles.DoC.Rmax = str2double(get(handles.handles.DoCSettingsEdit(2),'string'));
         handles.DoC.Step = str2double(get(handles.handles.DoCSettingsEdit(3),'string'));
         handles.DoC.ColoThres = str2double(get(handles.handles.DoCSettingsEdit(4), 'string'));
+        handles.DoC.NbThresh = str2double(get(handles.handles.DoCSettingsEdit(5), 'string'));
              
         % Collect inputs and set parameters in guidata
      	handles.DBSCAN(ch).epsilon = str2double(get(handles.handles.DBSCANSettingsEdit(1),'string'));
@@ -2648,6 +2658,7 @@ function ExportToTextPush(varargin)
             fprintf(fID, '# DoCRmax: %d\r\n', handles.DoC.Rmax);
             fprintf(fID, '# DoCStep: %d\r\n', handles.DoC.Step);
             fprintf(fID, '# DoCColocalizationThreshold: %.4f\r\n', handles.DoC.ColoThres);
+            fprintf(fID, '# DoCMinColocPoints: %.4f\r\n', handles.DoC.NbThresh);
             fprintf(fID, '\r\n');
 
             fclose(fID);
@@ -2697,6 +2708,7 @@ function ExportToTextPush(varargin)
         fprintf(fID, '# DoCRmax: %d\r\n', handles.DoC.Rmax);
         fprintf(fID, '# DoCStep: %d\r\n', handles.DoC.Step);
         fprintf(fID, '# DoCColocalizationThreshold: %.4f\r\n', handles.DoC.ColoThres);
+        fprintf(fID, '# DoCMinColocPoints: %.4f\r\n', handles.DoC.NbThresh);
         fprintf(fID, '\r\n');
 
         fclose(fID);

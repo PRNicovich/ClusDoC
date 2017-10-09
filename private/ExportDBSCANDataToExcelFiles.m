@@ -28,6 +28,9 @@ function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder, chan)
         RelativeDensity_column, TotalNumber, Circularity_column, Number_Cluster_column, Number_Cluster_column./(1e-6*cellROIPair(:,5))];
     
     try 
+        
+        disp('Export')
+        disp(chan);
 
         xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), cellROIPair, sprintf('Chan%d', chan), 'A2');
         xlswrite(fullfile(outputFolder, 'DBSCAN Results.xls'), HeaderArray, sprintf('Chan%d', chan), 'A1');
