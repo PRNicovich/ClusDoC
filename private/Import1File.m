@@ -158,6 +158,45 @@ end
                      % power of 2, closest power of 2];
                      closestPow2 = 2^max([ceil(log2(max(Data(:,5)/pixelSizenm))), ...
                                           ceil(log2(max(Data(:,6)/pixelSizenm)))]);
+                                      
+            
+                     prevPow2 = 2^(log2(closestPow2)-1);
+                     outSmallBox = ((Data(:,5) > prevPow2*1e2) | (Data(:,6) > prevPow2*1e2));
+                     
+                     
+                     pctOutSmallBox = sum(outSmallBox)/numel(outSmallBox);
+                     if pctOutSmallBox < 0.05
+                         choice = questdlg(sprintf('%.f of %.f points (%.1d %%) are outside %.f x %.f pixel box.\n\nWould you like to truncate the field of view?', ....
+                                                    sum(outSmallBox), numel(outSmallBox), pctOutSmallBox*100, prevPow2, prevPow2), ...
+                                            'Truncate master FOV', ...
+                                            sprintf('Truncate to %.f x %.f', prevPow2, prevPow2), ...
+                                            sprintf('Keep %.f x %.f', closestPow2, closestPow2), ...
+                                            sprintf('Truncate to %.f x %.f', prevPow2, prevPow2) );
+                                        
+                         switch choice
+                             case sprintf('Truncate to %.f x %.f', prevPow2, prevPow2)
+                                 
+                                 Data(outSmallBox, :) = [];
+                                 closestPow2 = prevPow2;
+                                 
+                             case sprintf('Keep %.f x %.f', closestPow2, closestPow2)
+                                 
+                                 % Do nothing + keep size with closestPow2
+                                 
+                             otherwise
+                                 
+                                 % Default is do nothing + keep size with closestPow2
+                                 
+                         end
+                         
+                     end                 
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
             Footer_text{2} = [pixelSizenm/1e3, pixelSizenm/1e3, 0.1, 0.1, ...
                                 closestPow2/0.1, closestPow2/0.1];
 
@@ -209,6 +248,40 @@ end
                      % power of 2, closest power of 2];
                      closestPow2 = 2^max([ceil(log2(max(Data(:,5)/160))), ...
                                           ceil(log2(max(Data(:,6)/160)))]);
+                                      
+                                      
+                     prevPow2 = 2^(log2(closestPow2)-1);
+                     outSmallBox = ((Data(:,5) > prevPow2*1e2) | (Data(:,6) > prevPow2*1e2));
+                     pctOutSmallBox = sum(outSmallBox)/numel(outSmallBox);
+                     if pctOutSmallBox < 0.05
+                         choice = questdlg(sprintf('%.f of %.f points (%.1d %%) are outside %.f x %.f pixel box.\n\nWould you like to truncate the field of view?', ....
+                                                    sum(outSmallBox), numel(outSmallBox), pctOutSmallBox*100, prevPow2, prevPow2), ...
+                                            'Truncate master FOV', ...
+                                            sprintf('Truncate to %.f x %.f', prevPow2, prevPow2), ...
+                                            sprintf('Keep %.f x %.f', closestPow2, closestPow2), ...
+                                            sprintf('Truncate to %.f x %.f', prevPow2, prevPow2) );
+                                        
+                         switch choice
+                             case sprintf('Truncate to %.f x %.f', prevPow2, prevPow2)
+                                 
+                                 Data(((Data(:,5) > prevPow2*1e2) | (Data(:,6) > prevPow2*1e2)), :) = [];
+                                 closestPow2 = prevPow2;
+                                 
+                             case sprintf('Keep %.f x %.f', closestPow2, closestPow2)
+                                 
+                                 % Do nothing + keep size with closestPow2
+                                 
+                             otherwise
+                                 
+                                 % Default is do nothing + keep size with closestPow2
+                                 
+                         end
+                         
+                     end
+                                  
+                     
+                     
+                     
             Footer_text{2} = [0.16, 0.16, 0.1, 0.1, closestPow2/0.1, closestPow2/0.1];
 
     end
