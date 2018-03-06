@@ -2509,6 +2509,13 @@ function DoC_All(~, ~, ~)
             [ClusterTableCh1, ClusterTableCh2, clusterIDOut, handles.ClusterTable] = DBSCANonDoCResults(handles.CellData, handles.ROICoordinates, ...
                 strcat(handles.Outputfolder, '\Clus-DoC Results'), handles.Chan1Color, handles.Chan2Color, dbscanParams, handles.NDataColumns);
             
+            if ~isfield(handles, 'ClusterSmoothTables')
+                handles.ClusterSmoothTables = cell(handles.Nchannels, 1);
+            end
+            
+            handles.ClusterSmoothTables{1} = ClusterTableCh1;
+            handles.ClusterSmoothTables{2} = ClusterTableCh2;
+            
             handles = AssignDoCDataToPoints(handles, clusterIDOut);
 
 %                             
