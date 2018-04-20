@@ -700,7 +700,7 @@ function Load_Data(~,~,~)
                 handles.CellData{k}(any(handles.CellData{k}(:, 5:6) > handles.MaxSize), : )= [];
                 handles.CellData{k}(any(handles.CellData{k}(:, 5:6) < 0), : )= [];
                 
-                handles.Nchannels = numel(unique(handles.CellData{k}(:,12)));
+                handles.Nchannels = min([numel(unique(handles.CellData{k}(:,12))), 2]); % cap import to 2 channels ever
 
                 
             else
