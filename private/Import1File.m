@@ -37,8 +37,8 @@ N_cols = numel(idx)+1; % Number of tabs in first line, plus 1
 
 [Head_text, Head_post] = textscan(fid, format_spec, N_cols, 'delimiter', TABCHAR);
 
-if length(Head_text{1}) == 24 % Nikon file format
-    format_spec = ['%s', repmat('%n', 1, 23)]; 
+if (length(Head_text{1}) == 24) ||  (length(Head_text{1}) == 26) % Nikon file format
+    format_spec = ['%s', repmat('%n', 1, N_cols - 1)]; 
 else % Zeiss file format
     Body_format = '%n';
     format_spec = repmat(Body_format, 1, numel(idx)+1);
@@ -220,13 +220,16 @@ end
             Data = [Body_text{1} Body_text{2} Body_text{3} Body_text{4} Body_text{5} Body_text{6}...
                 Body_text{7} Body_text{8} Body_text{9} Body_text{10} Body_text{11} Body_text{12} Body_text{13} Body_text{14}]; 
             
-        case 24 % Nikon format
+        case {24, 26} % Nikon format
 
             % Need to get channel ID out of a string ID in the first
             % column
+            
+            % If 26 columns, Zw and Zwc are ignored
 
             channelID = ones(length(Body_text{1}), 1);
             possibleChannels = unique(Body_text{1});
+            possibleChannels(cellfun(@isempty, possibleChannels)) = [];
             if length(unique(Body_text{1})) > 1
                 for k = 1:length(possibleChannels)
                     channelID(strcmp(Body_text{1}, possibleChannels{k}), 1) = k;

@@ -813,7 +813,7 @@ function Load_Data(~,~,~)
 
         if ismember(nTabs, [11, 12, 13, 14]) && strcmp(firstEntry, 'Index')
             isGood = true;
-        elseif ismember(nTabs, 23) && strcmp(firstEntry, 'Chann')
+        elseif ismember(nTabs, [23, 25]) && strcmp(firstEntry, 'Chann')
             isGood = true;
             % Is good Nikon file, which will get interpreted into Zeiss
             % format in Import1File
