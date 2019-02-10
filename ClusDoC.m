@@ -2044,6 +2044,9 @@ function RipleyKtest(~, ~, ~)
 
             set(handles.handles.MainFig, 'pointer', 'arrow');
             set(findobj('parent', handles.handles.b_panel), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
             drawnow;
             fprintf(1, 'Ripley K test completed.\n');
             
@@ -2051,6 +2054,9 @@ function RipleyKtest(~, ~, ~)
             
             set(handles.handles.MainFig, 'pointer', 'arrow');
             set(findobj('parent', handles.handles.b_panel), 'enable', 'on');
+            if handles.Nchannels == 1
+                set(handles.handles.hDoC_All1, 'enable', 'off');
+            end
             drawnow;
             
             display('Ripley K test exited with errors');
