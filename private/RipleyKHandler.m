@@ -42,10 +42,17 @@ function valOut = RipleyKHandler(handles, Start, End, Step, MaxSampledPts, Chan1
 
                     % Calculate RipleyK for this cell + ROI w/ Channel 1
                     % data
-
-                    selectNums = randsample(1:size(dataCropped, 1), MaxSampledPts);
-                    selectVector = false(size(dataCropped, 1), 1);
-                    selectVector(selectNums) = true;
+                    
+                    assignin('base', 'dataCropped', dataCropped);
+                    assignin('base', 'MaxSampledPts', MaxSampledPts);
+                    
+                    if MaxSampledPts < size(dataCropped)
+                        selectNums = randsample(1:size(dataCropped, 1), MaxSampledPts);
+                        selectVector = false(size(dataCropped, 1), 1);
+                        selectVector(selectNums) = true;
+                    else 
+                        selectVector = true(size(dataCropped, 1), 1);
+                    end
 
                     for chan = unique(dataCropped(:,12))'
 

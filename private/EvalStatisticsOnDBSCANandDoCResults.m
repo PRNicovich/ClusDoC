@@ -1,8 +1,10 @@
 function EvalStatisticsOnDBSCANandDoCResults(ClusterSmoothTableCh, Ch, outputFolder)
 
 % Tabulate stats and output excel file for Clus-DoC analysis
+%% Pull NbThresh from handles
 
-%% Comparison of density 
+handles = guidata(findobj('Tag', 'PALM GUI'));
+
 
 %% Density Comparison
 
@@ -33,12 +35,12 @@ for i=1:column
 
         if ~isempty(A)
             
-           % Population of cluster with Nb>10  
-           AA=cellfun(@(x) x(x.Nb>10), A,'UniformOUtput',0);
+           % Population of cluster with Nb > NbThresh
+           AA=cellfun(@(x) x(x.Nb > handles.DoC.NbThresh), A,'UniformOUtput',0);
            A=A(~cellfun('isempty', AA));
            
-           % Cluster with Nb(Dof>0.4) >10          
-           Cluster_DofC=cellfun(@(x) x(x.Nb_In>10), A,'UniformOUtput',0);
+           % Cluster with Nb(Dof>0.4) > NbThresh      
+           Cluster_DofC=cellfun(@(x) x(x.Nb_In > handles.DoC.NbThresh), A,'UniformOUtput',0);
            Cluster_DofC=Cluster_DofC(~cellfun('isempty', Cluster_DofC));
            
            
@@ -57,8 +59,8 @@ for i=1:column
            
            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
            
-           % Cluster with Nb(Dof>0.4) <10
-           Cluster_Other=cellfun(@(x) x(x.Nb_In<=10), A,'UniformOUtput',0);
+           % Cluster with Nb(Dof>0.4) < NbThresh
+           Cluster_Other=cellfun(@(x) x(x.Nb_In <= handles.DoC.NbThresh), A,'UniformOUtput',0);
            Cluster_Other=Cluster_Other(~cellfun('isempty', Cluster_Other));
                       
            Density2=cellfun(@(x) x.AvRelativeDensity20, Cluster_Other);
@@ -78,7 +80,7 @@ for i=1:column
            
            % Population of cluster with Nb<10  
            A=ClusterSmoothTableCh{j,i};
-           AA=cellfun(@(x) x(x.Nb<=10), A,'UniformOUtput',0);
+           AA=cellfun(@(x) x(x.Nb <= handles.DoC.NbThresh), A,'UniformOUtput',0);
            A=A(~cellfun('isempty', AA));
            
            Density3=cellfun(@(x) x.AvRelativeDensity20, A);
@@ -139,7 +141,7 @@ end
     Circularity2 = cell2mat(MeanCircularity2(:));
 
     
-    % Density Area Circularity for cluster with Nb<10  
+    % Density Area Circularity for cluster with Nb<NbThresh 
 %     Density3 = cell2mat(MeanDensity3(:));
 %     Area3 = cell2mat(MeanArea3(:));
 %     Circularity3=cell2mat(MeanCircularity3(:));
