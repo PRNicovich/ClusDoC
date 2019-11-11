@@ -677,10 +677,17 @@ function Load_Data(~,~,~)
             if goodZENFile
 
                 importData = Import1File(fullfile(pathName, fileName{k}));
+                
+                
                 handles.CellData{k} = [importData.Data zeros(size(importData.Data, 1), 8)];
+                
 %                 handles.CellData{k}(:,5:6) = handles.CellData{k}(:,5:6)*importData.Footer{2}(3)/importData.Footer{2}(1);
-                handles.CellData{k}(any(isnan(handles.CellData{k}), 2), :) = []; % protection against incomplete line writing in ZEN export
-                   
+
+
+%                 handles.CellData{k}(any(isnan(handles.CellData{k}), 2), :) = []; % protection against incomplete line writing in ZEN export
+                                                                                 % This breaks import for ThunderSTORMConcatenator output 
+                                                                                 % Commenting this out to allow that format to work.
+
                 handles.NDataColumns = size(importData.Data, 2);
                 handles.CellData{k}(:,handles.NDataColumns + 2) = 1; % All data is in mask until set otherwise
                 handles.ROIMultiplier = importData.Footer{2}(1); % Conversion from coordinates.txt positions to nm
