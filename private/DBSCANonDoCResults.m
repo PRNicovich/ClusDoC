@@ -17,7 +17,7 @@ function [ClusterSmoothTableCh1, ClusterSmoothTableCh2, clusterIDOut, clusterTab
 ClusterSmoothTableCh1 = cell(max(cellfun(@length, ROICoordinates)), length(CellData));
 ClusterSmoothTableCh2 = cell(max(cellfun(@length, ROICoordinates)), length(CellData));
 
-ResultCell = cell(max(cellfun(@length, ROICoordinates)), length(CellData));
+ResultCell = cell(max(cellfun(@length, ROICoordinates)), length(CellData)); % it looks like this is initialize to the max number of ROIs? which means empty end ones are used, which need to be differentiated from skipped ROIs
 
 clusterIDOut = cell(max(cellfun(@length, ROICoordinates)), length(CellData), 2);
 
@@ -171,7 +171,7 @@ function clusterTableOut = AppendToClusterTableInternal(clusterTable, Ch, cellIt
         appendTable(:, 5) = cell2mat(cellfun(@(x) size(x.Points, 1), ClusterCh, 'uniformoutput', false)); % NPoints
         appendTable(:, 6) = cellfun(@(x) x.Nb, ClusterCh); % Nb
 
-        if isfield(ClusterCh{1}, 'MeanDoC')
+        if size(ClusterCh, 1) > 0 && isfield(ClusterCh{1}, 'MeanDoC')
             appendTable(:, 7) = cellfun(@(x) x.MeanDoC, ClusterCh); % MeanDoCScore
         end
 
@@ -188,7 +188,7 @@ function clusterTableOut = AppendToClusterTableInternal(clusterTable, Ch, cellIt
     
     catch mError
         assignin('base', 'ClusterCh', ClusterCh);
-        assignin('base', 'clusterIDList', clusterIDList);
+        assignin('base', 'clusterIDList', appendTable(:, 4)); % clusterIDList didn't exist, so this is just a guess replacement
         assignin('base', 'appendTable', appendTable);
         assignin('base', 'classOut', classOut);
 
