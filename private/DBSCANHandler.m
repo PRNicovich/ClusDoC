@@ -8,29 +8,38 @@ function [datathr, ClusterSmooth, SumofContour, classOut, varargout] = DBSCANHan
     % will fail and crash MATLAB.  
     % To pass test, there have to be at least DBSCANParams.minPts points
     % that are within DBSCANParams.epsilon distance from other points.  
-    distRow = pdist(Data(:,1:2));
-    nPossibleClustering = sum(distRow < DBSCANParams.epsilon);
-    if nPossibleClustering >= DBSCANParams.minPts
-        checkClusterTest = true;
+    
+    if length(Data(:,1:2)) <= 20000
+        distRow = pdist(Data(:,1:2));
+        nPossibleClustering = sum(distRow < DBSCANParams.epsilon);
+        if nPossibleClustering >= DBSCANParams.minPts
+            checkClusterTest = true;
+        else
+            checkClusterTest = false;
+        end
     else
-        checkClusterTest = false;
+        checkClusterTest = true; % too many points to check with above method, just assume it works
+        % confirmed that this one test is the largest barrier to memory. No
+        % other method choked.
     end
     
-
+    
+    
+    SumofContour = {};  % moved outside of check below because I got an error that this wasn't set.
+    datathr = Data;
+    classOut = zeros(size(Data, 1), 1);
+    class = [];
+    ClusterSmooth=cell(max(class),1);
+    SumofContour = {};
+    varargout{1} = [];
+    varargout{2} = [];
+    varargout{3} = [];
+    varargout{4} = struct;
+    
     if ~checkClusterTest
         % No chance of a cluster.  MEX code is going to throw a fault.
         % Skip this ROI.
-        
-        datathr = Data;
-        classOut = zeros(size(Data, 1), 1);
-        class = [];
-        ClusterSmooth=cell(max(class),1);
-        SumofContour = {};
-        varargout{1} = [];
-        varargout{2} = [];
-        varargout{3} = [];
-        varargout{4} = [];
-        
+        varargout{4} = missing;
         return
         
     end

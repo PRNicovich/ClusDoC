@@ -1,21 +1,34 @@
 function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder, chan)
 
+    function y = isstructmissing(x)
+        if isstruct(x) || isempty(x)
+            y = false;
+        else
+            y = ismissing(x);
+        end
+    end
+
     % Formerly Final_Result_DBSCAN_GUIV2
     % Extracts and exports Results table into Excel format
     
     A = Result(:);
     
-    cellROIPair(cellfun('isempty', A), :) = []; % filter out empty ones
-    A = A(~cellfun('isempty', A));
+    %cellROIPair(cellfun('isempty', A), :) = []; % filter out empty ones --
+    %appears that this isn't needed? cellROIPair is already smaller than A
+    %at this point...
     
-    Percent_in_Cluster_column = cell2mat(cellfun(@(x) x.Percent_in_Cluster, A, 'UniformOutput', false));
-    Number_column = cell2mat(cellfun(@(x) x.Number, A, 'UniformOutput', false));
-    Area_column = cell2mat(cellfun(@(x) x.Area, A , 'UniformOutput', false));
-    Density_column = cell2mat(cellfun(@(x) x.Density, A, 'UniformOutput', false));
-    RelativeDensity_column = cell2mat(cellfun(@(x) x.RelativeDensity, A, 'UniformOutput', false));
-    TotalNumber = cell2mat(cellfun(@(x) x.TotalNumber, A, 'UniformOutput', false));
-    Circularity_column = cell2mat(cellfun(@(x) x.Mean_Circularity, A,'UniformOutput', false));
-    Number_Cluster_column = cell2mat(cellfun(@(x) x.Number_Cluster, A, 'UniformOutput', false));
+    notemptyA = ~cellfun('isempty', A); % empty array cells are not ROIs, they were unused placeholders in the matrix
+    notmissingA = ~cellfun(@(x) isstructmissing(x), A); % missing cells are ROIs that had no interactions, and do no appear in the cellROIPair table; can't use ismissing directly because it fails with structs
+    not_empty_or_missingA = notemptyA & notmissingA;
+    
+    Percent_in_Cluster_column(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.Percent_in_Cluster, A(not_empty_or_missingA), 'UniformOutput', false));
+    Number_column(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.Number, A(not_empty_or_missingA), 'UniformOutput', false));
+    Area_column(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.Area, A(not_empty_or_missingA), 'UniformOutput', false));
+    Density_column(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.Density, A(not_empty_or_missingA), 'UniformOutput', false));
+    RelativeDensity_column(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.RelativeDensity, A(not_empty_or_missingA), 'UniformOutput', false));
+    TotalNumber(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.TotalNumber, A(not_empty_or_missingA), 'UniformOutput', false));
+    Circularity_column(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.Mean_Circularity, A(not_empty_or_missingA),'UniformOutput', false));
+    Number_Cluster_column(not_empty_or_missingA) = cell2mat(cellfun(@(x) x.Number_Cluster, A(not_empty_or_missingA), 'UniformOutput', false));
 
     %export data into Excel
 
@@ -24,8 +37,8 @@ function ExportDBSCANDataToExcelFiles(cellROIPair, Result, outputFolder, chan)
         {'Relative density in clusters'}, {'Total number of molecules in ROI'}, ...
         {'Circularity'}, {'Number of clusters in ROI'}, {'Density of clusters (clusters / um^2)'}];
 
-    Matrix_Result = [Percent_in_Cluster_column*100 , Number_column(:,1) , Area_column(:,1) , Density_column*1e6 ,...
-        RelativeDensity_column, TotalNumber, Circularity_column, Number_Cluster_column, Number_Cluster_column./(1e-6*cellROIPair(:,5))];
+    Matrix_Result = [Percent_in_Cluster_column(notemptyA)'*100 , Number_column(notemptyA)' , Area_column(notemptyA)' , Density_column(notemptyA)'*1e6 ,...
+        RelativeDensity_column(notemptyA)', TotalNumber(notemptyA)', Circularity_column(notemptyA)', Number_Cluster_column(notemptyA)', Number_Cluster_column(notemptyA)'./(1e-6*cellROIPair(:,5))];
     
     try 
         
